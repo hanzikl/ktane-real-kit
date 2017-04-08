@@ -1,9 +1,4 @@
 #include "LedControl.h"
-LedControl countdown_display = LedControl(12, 11, 10, 1);
-// pin 12 is connected to the MAX7219 pin 12
-// pin 11 is connected to the CLK pin 11
-// pin 10 is connected to LOAD pin 10
-// 1 as we are only using 1 MAX7219
 
 /*
    GENERAL SETUP
@@ -13,9 +8,18 @@ long remainingTime = 5 * 60 * 1000l; // in millis
 unsigned long previousMillis = 0; // time helper
 const long interval = 7; // how often should system react in millis
 
+boolean clockTicking = true;
+double clockSpeedFactor = 2.5;
+
 /*
    SETUP FOR COUNTDOWN DISLPAY
 */
+
+LedControl countdown_display = LedControl(12, 11, 10, 1);
+// pin 12 is connected to the MAX7219 pin 12
+// pin 11 is connected to the CLK pin 11
+// pin 10 is connected to LOAD pin 10
+// 1 as we are only using 1 MAX7219
 
 const int countdown_display_order = 0;
 
@@ -28,6 +32,12 @@ boolean countdown_blinked = true; // helper for blinking dots
 
 void setup()
 {
+
+  /*
+      GENERAL SETUP
+  */
+
+  Serial.begin(9600);
 
 
   /*
@@ -99,6 +109,8 @@ void showClean(int segmCount) {
 
 void update_countdown_display(long currentMillis) {
 
+  int blinkMillis = currentMillis % 1000;
+
   if (remainingTime > 0) {
 
     long temptime = remainingTime;
@@ -124,7 +136,7 @@ void update_countdown_display(long currentMillis) {
       blinkSpeedInversion = 200;
     }
 
-    countdown_blinked = (heremillis % blinkSpeedInversion > blinkSpeedInversion / 2);
+    countdown_blinked = (blinkMillis % blinkSpeedInversion > blinkSpeedInversion / 2);
 
     showMillis(heremillis);
     showSeconds(seconds);
@@ -145,8 +157,13 @@ void loop() {
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
 
-    remainingTime -= currentMillis - previousMillis;
+    if (clockTicking) {
+      remainingTime -= (long) round((currentMillis - previousMillis) * clockSpeedFactor);
+    }
+
     previousMillis = currentMillis;
+
+    clockTicking = (remainingTime > 0);
 
     /*
        Here comes the updates of device
