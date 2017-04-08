@@ -106,6 +106,7 @@ void loop() {
     */
 
     update_countdown_display(currentMillis);
+    update_beeper(remainingTime);
 
     if (clockTicking) {
       check_buttons_in_order();
