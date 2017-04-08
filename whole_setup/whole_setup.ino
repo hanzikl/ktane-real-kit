@@ -1,10 +1,9 @@
-#include "LedControl.h"
 
 /*
    GENERAL SETUP
 */
 
-long remainingTime = 5 * 60 * 1000l; // in millis
+long remainingTime = 1 * 60 * 1000l; // in millis
 unsigned long previousMillis = 0; // time helper
 const long interval = 7; // how often should system react in millis
 
@@ -17,35 +16,16 @@ byte max_strikes = 1;
 #define MODULE_DISARMED 0
 #define MODULE_ARMED 1
 #define MODULE_FAILED_TO_DISARM 2
+#define MODULE_DISARMING_IN_PROGRESS 3
 
 #define READING_ERROR 255
 
-/*
-   SETUP FOR COUNTDOWN DISLPAY
-*/
-
-LedControl countdown_display = LedControl(12, 11, 10, 1);
-// pin 12 is connected to the MAX7219 pin 12
-// pin 11 is connected to the CLK pin 11
-// pin 10 is connected to LOAD pin 10
-// 1 as we are only using 1 MAX7219
-
-#define countdown_display_order 0
-
-const int countdown_millisPosition = - 2; // do not show last two digits from millis
-const int countdown_secondsPosition = countdown_millisPosition + 3;
-const int countdown_minutesPosition = countdown_secondsPosition + 2;
-
-boolean countdown_blinked = true; // helper for blinking dots
+#define DEBUGING
 
 /*
-  SETUP FOR BUTTONS IN ORDER
+   MODULES STATUS
 */
 
-#define BIO_PIN_1 2
-#define BIO_PIN_2 3
-
-byte bio_previous_reading = 0x00;
 byte bio_status = MODULE_ARMED;
 
 
@@ -56,9 +36,11 @@ void setup()
       GENERAL SETUP
   */
 
+#ifdef DEBUGING
   Serial.begin(9600);
 
   Serial.print("\nKeep Talking and Nobody Explodes REALISTIC KIT\n");
+#endif
 
   setup_countdown_display();
   setup_buttons_in_order();
@@ -68,18 +50,25 @@ void setup()
 
 void addStrike() {
 
+#ifdef DEBUGING
   Serial.println("STRIKE!");
+#endif
 
   strikes++;
   if (strikes > max_strikes) {
     remainingTime = 0;
+#ifdef DEBUGING
+    Serial.println("IT IS OVER NOW!");
+#endif
     return;
   }
 
   clockSpeedFactor *= 1.5;
 
+#ifdef DEBUGING
   Serial.print("Current clock speed factor is ");
   Serial.println(clockSpeedFactor);
+#endif
 
 }
 
@@ -92,8 +81,10 @@ void settleModules() {
 
   clockTicking = false;
 
+#ifdef DEBUGING
   Serial.println("ALL MODULES DISARMED");
-  
+#endif
+
 }
 
 

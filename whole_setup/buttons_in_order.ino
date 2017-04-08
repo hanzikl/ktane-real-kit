@@ -1,10 +1,24 @@
+#ifdef DEBUGING
+#define DEBUGING_BIO
+#endif
+
+/*
+  SETUP FOR BUTTONS IN ORDER
+*/
+
+#define BIO_PIN_1 2
+#define BIO_PIN_2 3
+
+byte bio_previous_reading = 0x00;
 
 #define BIO_CORRECT_BUTTON 1
+
+
 
 void setup_buttons_in_order() {
 
   /*
-    SETUP FOR BUTTONS IN ORDER
+    SETUP FUNCTION FOR BUTTONS IN ORDER
   */
 
   pinMode(BIO_PIN_1, INPUT);
@@ -43,11 +57,13 @@ void check_buttons_in_order() {
   byte reading = bio_get_readings();
   // Serial.println(reading);
 
-  if (bio_status == MODULE_FAILED_TO_DISARM) {
-    // not react until all buttons are off
+  if (bio_status == MODULE_FAILED_TO_DISARM || bio_status == MODULE_DISARMING_IN_PROGRESS) {
+    // do not react until all buttons are off
     if (reading == 0) {
       bio_status = MODULE_ARMED;
-      Serial.println("REARMING ButtonsInOrder MODULE");
+#ifdef DEBUGING_BIO
+      Serial.println("RE-ARMING MODULE Buttons In Order");
+#endif
     }
     return;
   }

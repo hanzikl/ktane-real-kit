@@ -1,4 +1,24 @@
 /*
+   SETUP FOR COUNTDOWN DISLPAY
+*/
+
+#include "LedControl.h"
+
+LedControl countdown_display = LedControl(12, 11, 10, 1);
+// pin 12 is connected to the MAX7219 pin 12
+// pin 11 is connected to the CLK pin 11
+// pin 10 is connected to LOAD pin 10
+// 1 as we are only using 1 MAX7219
+
+#define countdown_display_order 0
+
+const int countdown_millisPosition = - 2; // do not show last two digits from millis
+const int countdown_secondsPosition = countdown_millisPosition + 3;
+const int countdown_minutesPosition = countdown_secondsPosition + 2;
+
+boolean countdown_blinked = true; // helper for blinking dots
+
+/*
    COUNTDOWN DISPLAY methods
 */
 
