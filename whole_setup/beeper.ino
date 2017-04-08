@@ -24,6 +24,8 @@ void update_beeper(long currentMillis) {
 
   int blinkMillis = currentMillis % 1000;
 
+  boolean beeper_on = false;
+
   if (remainingTime > 0) {
 
     // blink speed according to remaining time
@@ -36,16 +38,14 @@ void update_beeper(long currentMillis) {
       blinkSpeedInversion = 200;
     }
 
-    boolean beeper_on = clockTicking
-                        && (blinkMillis % blinkSpeedInversion > blinkSpeedInversion / 2)
-                        && (blinkMillis % blinkSpeedInversion < blinkSpeedInversion / 2 + BEEPER_BEEP_LENGTH);
-
-    if (beeper_on) {
-      digitalWrite(BEEPER_PIN, HIGH);
-    } else {
-      digitalWrite(BEEPER_PIN, LOW);
-    }
-    
+    beeper_on = clockTicking && (blinkMillis % blinkSpeedInversion < BEEPER_BEEP_LENGTH);
   }
+
+  if (beeper_on) {
+    digitalWrite(BEEPER_PIN, HIGH);
+  } else {
+    digitalWrite(BEEPER_PIN, LOW);
+  }
+
 }
 
