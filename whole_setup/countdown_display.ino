@@ -118,7 +118,7 @@ void update_countdown_display(long currentMillis) {
       blinkSpeedInversion = 200;
     }
 
-    countdown_blinked = (blinkMillis % blinkSpeedInversion > blinkSpeedInversion / 2);
+    countdown_blinked = (!clockTicking) || (blinkMillis % blinkSpeedInversion > blinkSpeedInversion / 2);
 
     showMillis(heremillis);
     showSeconds(seconds);
