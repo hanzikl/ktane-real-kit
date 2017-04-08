@@ -2,6 +2,19 @@
    COUNTDOWN DISPLAY methods
 */
 
+void setup_countdown_display() {
+
+  /*
+    SETUP FOR COUNTDOWN DISLPAY
+  */
+
+  // the zero refers to the MAX7219 number, it is zero for 1 chip
+  countdown_display.shutdown(0, false); // turn off power saving, enables display
+  countdown_display.setIntensity(0, 8); // sets brightness (0~15 possible values)
+  countdown_display.clearDisplay(0);// clear screen
+}
+
+
 /*
    Helper function for COUNTDOWN DISLPAY
 */
