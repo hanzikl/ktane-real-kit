@@ -17,6 +17,14 @@ const int countdown_minutesPosition = countdown_secondsPosition + 2;
 
 boolean countdown_blinked = true; // helper for blinking dots
 
+#ifdef DEBUGING
+#define DEBUGING_COUNTDOWN
+#endif
+
+#ifdef DEBUGING_COUNTDOWN
+int previous_second = 0;
+#endif
+
 /*
    COUNTDOWN DISPLAY methods
 */
@@ -67,6 +75,17 @@ void showTime(long remainingTime) {
     showCountdownNumberInPosition(heremillis / 10, countdown_secondsPosition);
     showCountdownNumberInPosition(seconds, countdown_minutesPosition);
   }
+
+#ifdef DEBUGING_COUNTDOWN
+  if (previous_second != seconds) {
+    Serial.print("Countdown: ");
+    Serial.print(minutes);
+    Serial.print(":");
+    Serial.println(seconds);
+    previous_second = seconds;
+  }
+#endif
+
 }
 
 void updateDisplayBlink(long currentMillis) {
