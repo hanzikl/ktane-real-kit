@@ -10,13 +10,17 @@ const long interval = 7; // how often should system react in millis
 boolean clockTicking = true;
 double clockSpeedFactor = 1;
 
+boolean modules_testing = false;
+
 byte strikes = 0;
 byte max_strikes = 1;
 
-#define MODULE_DISARMED 0
-#define MODULE_ARMED 1
-#define MODULE_FAILED_TO_DISARM 2
-#define MODULE_DISARMING_IN_PROGRESS 3
+#define MODULE_TESTING 0
+#define MODULE_DISARMED 1
+#define MODULE_ARMED 2
+#define MODULE_FAILED_TO_DISARM 3
+#define MODULE_DISARMING_IN_PROGRESS 4
+
 
 #define MODULE_TYPE_MISSING 0
 #define MODULE_TYPE_DISPLAY 1
@@ -32,6 +36,7 @@ byte max_strikes = 1;
 #define DEBUGING
 
 #define MODULE_MAX_COUNT 6
+#define MODULE_DATA_SIZE 41
 
 /*
    MODULES STATUS
@@ -41,6 +46,9 @@ byte bio_status = MODULE_ARMED;
 
 byte module_types[MODULE_MAX_COUNT + 1];
 byte module_status[MODULE_MAX_COUNT + 1];
+byte module_stage[MODULE_MAX_COUNT + 1];
+
+byte module_data[MODULE_MAX_COUNT + 1][MODULE_DATA_SIZE + 1];
 
 /*
    MODULES PROPERTIES
@@ -48,11 +56,12 @@ byte module_status[MODULE_MAX_COUNT + 1];
 
 #include <avr/pgmspace.h>
 
-const byte modulesSRinputWidth[] PROGMEM = {0, 0, 8, 0, 0, 0, 0};
-const byte modulesSRoutputWidth[] PROGMEM = {0, 0, 8, 0, 0, 0, 0};
+const byte modulesSRinputWidth[] PROGMEM = {0, 0, 1, 0, 0, 0, 0};
+const byte modulesSRoutputWidth[] PROGMEM = {0, 0, 1, 0, 0, 0, 0};
 
-byte SRoffsetsInput[MODULE_MAX_COUNT + 1];
-byte SRoffsetsOutput[MODULE_MAX_COUNT + 1];
+// offsets are computed for all modules plus one virtual module at the end
+byte SRoffsetsInput[MODULE_MAX_COUNT + 2];
+byte SRoffsetsOutput[MODULE_MAX_COUNT + 2];
 
 void setup()
 {
@@ -69,6 +78,7 @@ void setup()
 
   initModules();
 
+  setup_beeper();
   setup_countdown_display();
   setup_buttons_in_order();
 
@@ -78,19 +88,30 @@ void initModules() {
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     module_types[i] = 0;
     module_status[i] = MODULE_DISARMED;
+    module_stage[i] = 0;
+    for (int j = 0; j < MODULE_DATA_SIZE; j++) {
+      module_data[i][j] = 0;
+    }
   }
 
-  // modul Simon
+  // pozice 0 - modul Simon
   module_types[0] = MODULE_TYPE_SIMON;
   module_status[0] = MODULE_ARMED;
 
   // spocte offsety Shift registru vstupu a vystupu
-  for (int i = 1; i < MODULE_MAX_COUNT; i++) {
-    SRoffsetsInput[i] = SRoffsetsInput[i - 1] + modulesSRinputWidth[module_types[i]];
-    SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i]];
+  for (int i = 1; i < MODULE_MAX_COUNT + 1; i++) {
+    SRoffsetsInput[i] = SRoffsetsInput[i - 1] + modulesSRinputWidth[module_types[i - 1]];
+    SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i - 1]];
+  }
+
+
+  for (int i = 0; i < MODULE_MAX_COUNT; i++) {
+    call_module_setup(i);
   }
 
 }
+
+
 
 void addStrike() {
 
@@ -124,7 +145,7 @@ void settleModules() {
   }
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
-    if (module_status[i] != MODULE_DISARMED) {
+    if (module_status[i] > MODULE_DISARMED) {
       return;
     }
   }
@@ -157,6 +178,10 @@ void loop() {
 
     update_countdown_display(currentMillis);
     update_beeper(remainingTime);
+
+    for (int i = 0; i < MODULE_MAX_COUNT; i++) {
+      call_module_update(i);
+    }
 
     if (clockTicking) {
       check_buttons_in_order();
