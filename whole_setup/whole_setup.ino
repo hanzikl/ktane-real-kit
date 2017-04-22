@@ -1,3 +1,4 @@
+#include <avr/pgmspace.h>
 
 /*
    GENERAL SETUP
@@ -30,13 +31,26 @@ byte max_strikes = 1;
 #define MODULE_TYPE_SYMBOLS 5
 #define MODULE_TYPE_MEMORY 6
 #define MODULE_TYPE_MAZE 7
+#define MODULE_TYPE_TEST_OUTPUT 8
+#define MODULE_TYPE_TEST_INPUT 9
+
+
+// pocet bajtu na modul podle typu:
+const byte modulesSRinputWidth[] = {0, 0, 1, 1, 1, 1, 1, 1, 0, 1};
+const byte modulesSRoutputWidth[] = {0, 5, 1, 1, 1, 1, 6, 1, 2, 0};
 
 #define READING_ERROR 255
 
 #define DEBUGING
 
+#ifdef DEBUGING
+#define DEBUGING_INIT_MODULES
+#endif
+
+
 #define MODULE_MAX_COUNT 6
 #define MODULE_DATA_SIZE 41
+#define MODULE_MAX_OUTPUT_SIZE 6
 
 /*
    MODULES STATUS
@@ -50,14 +64,13 @@ byte module_stage[MODULE_MAX_COUNT + 1];
 
 byte module_data[MODULE_MAX_COUNT + 1][MODULE_DATA_SIZE + 1];
 
+byte shift_register_input[MODULE_MAX_COUNT + 1];
+byte shift_register_output[(MODULE_MAX_COUNT * MODULE_MAX_OUTPUT_SIZE) + 1];
+
 /*
    MODULES PROPERTIES
 */
 
-#include <avr/pgmspace.h>
-
-const byte modulesSRinputWidth[] PROGMEM = {0, 0, 1, 0, 0, 0, 0};
-const byte modulesSRoutputWidth[] PROGMEM = {0, 0, 1, 0, 0, 0, 0};
 
 // offsets are computed for all modules plus one virtual module at the end
 byte SRoffsetsInput[MODULE_MAX_COUNT + 2];
@@ -73,20 +86,23 @@ void setup()
 #ifdef DEBUGING
   Serial.begin(9600);
 
-  Serial.print("\nKeep Talking and Nobody Explodes REALISTIC KIT\n");
+  Serial.print(F("\nKeep Talking and Nobody Explodes REALISTIC KIT\n"));
 #endif
 
   initModules();
 
   setup_beeper();
+  setup_shift_registers();
   // setup_countdown_display();
   // setup_buttons_in_order();
+
+  initModulesTest();
 
 }
 
 void initModules() {
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
-    module_types[i] = 0;
+    module_types[i] = MODULE_TYPE_MISSING;
     module_status[i] = MODULE_DISARMED;
     module_stage[i] = 0;
     for (int j = 0; j < MODULE_DATA_SIZE; j++) {
@@ -95,15 +111,50 @@ void initModules() {
   }
 
   // pozice 0 - modul Simon
-  module_types[0] = MODULE_TYPE_SIMON;
+  //module_types[0] = MODULE_TYPE_SIMON;
+  //module_status[0] = MODULE_ARMED;
+
+  // pozice 0 - modul test output
+  module_types[0] = MODULE_TYPE_TEST_OUTPUT;
   module_status[0] = MODULE_ARMED;
 
+#ifdef DEBUGING_INIT_MODULES
+  Serial.print(F("Modules:"));
+  for (int i = 0; i < MODULE_MAX_COUNT; i++) {
+    Serial.print(" #");
+    Serial.print(i);
+    Serial.print(" m");
+    Serial.print(module_types[i]);
+  }
+  Serial.println();
+  delay(5000);
+#endif
+
   // spocte offsety Shift registru vstupu a vystupu
-  for (int i = 1; i < MODULE_MAX_COUNT + 1; i++) {
+  for (int i = 1; i < MODULE_MAX_COUNT + 2; i++) {
+#ifdef DEBUGING_INIT_MODULES
+    Serial.print(i);
+    Serial.print(" w:");
+    Serial.print(modulesSRoutputWidth[module_types[i - 1]]);
+    Serial.println();
+#endif
     SRoffsetsInput[i] = SRoffsetsInput[i - 1] + modulesSRinputWidth[module_types[i - 1]];
     SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i - 1]];
   }
 
+#ifdef DEBUGING_INIT_MODULES
+  Serial.print(F("InpOffs: "));
+  for (int i = 0; i < MODULE_MAX_COUNT + 2; i++) {
+    Serial.print(SRoffsetsInput[i]);
+    Serial.print(" ");
+  }
+  Serial.print(F("\nOutOffs: "));
+  for (int i = 0; i < MODULE_MAX_COUNT + 2; i++) {
+    Serial.print(SRoffsetsOutput[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+#endif
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     call_module_setup(i);
@@ -116,14 +167,14 @@ void initModules() {
 void addStrike() {
 
 #ifdef DEBUGING
-  Serial.println("STRIKE!");
+  Serial.println(F("STRIKE!"));
 #endif
 
   strikes++;
   if (strikes > max_strikes) {
     remainingTime = 0;
 #ifdef DEBUGING
-    Serial.println("IT IS OVER NOW!");
+    Serial.println(F("IT IS OVER NOW!"));
 #endif
     return;
   }
@@ -131,7 +182,7 @@ void addStrike() {
   clockSpeedFactor *= 1.5;
 
 #ifdef DEBUGING
-  Serial.print("Current clock speed factor is ");
+  Serial.print(F("Current clock speed factor is "));
   Serial.println(clockSpeedFactor);
 #endif
 
@@ -155,13 +206,17 @@ void settleModules() {
   clockTicking = false;
 
 #ifdef DEBUGING
-  Serial.println("ALL MODULES DISARMED");
+  Serial.println(F("ALL MODULES DISARMED"));
 #endif
 
 }
 
 
 void loop() {
+
+  if (modules_testing) {
+    administerTests();
+  }
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
@@ -187,7 +242,7 @@ void loop() {
 
     if (clockTicking) {
       // check_buttons_in_order();
-      // settleModules();
+      settleModules();
     }
 
   }
