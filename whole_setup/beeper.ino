@@ -3,10 +3,10 @@
 #endif
 
 /*
-  SETUP FOR BUTTONS IN ORDER
+  SETUP FOR BEEPER
 */
 
-#define BEEPER_PIN 4
+#define BEEPER_PIN 2
 #define BEEPER_BEEP_LENGTH 30
 
 void setup_beeper() {

@@ -79,8 +79,8 @@ void setup()
   initModules();
 
   setup_beeper();
-  setup_countdown_display();
-  setup_buttons_in_order();
+  // setup_countdown_display();
+  // setup_buttons_in_order();
 
 }
 
@@ -140,9 +140,11 @@ void addStrike() {
 
 void settleModules() {
 
-  if (bio_status != MODULE_DISARMED) {
-    return;
-  }
+  /*
+    if (bio_status != MODULE_DISARMED) {
+      return;
+    }
+  */
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     if (module_status[i] > MODULE_DISARMED) {
@@ -176,7 +178,7 @@ void loop() {
        Here comes the updates of device
     */
 
-    update_countdown_display(currentMillis);
+    // update_countdown_display(currentMillis);
     update_beeper(remainingTime);
 
     for (int i = 0; i < MODULE_MAX_COUNT; i++) {
@@ -184,8 +186,8 @@ void loop() {
     }
 
     if (clockTicking) {
-      check_buttons_in_order();
-      settleModules();
+      // check_buttons_in_order();
+      // settleModules();
     }
 
   }
