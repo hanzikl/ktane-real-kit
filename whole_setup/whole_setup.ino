@@ -64,7 +64,9 @@ byte module_stage[MODULE_MAX_COUNT + 1];
 
 byte module_data[MODULE_MAX_COUNT + 1][MODULE_DATA_SIZE + 1];
 
+// each module can have only one byte wide input
 byte shift_register_input[MODULE_MAX_COUNT + 1];
+// modules can have together only limited bytes wide output
 byte shift_register_output[(MODULE_MAX_COUNT * MODULE_MAX_OUTPUT_SIZE) + 1];
 
 /*
@@ -128,7 +130,7 @@ void initModules() {
     Serial.print(module_types[i]);
   }
   Serial.println();
-  delay(5000);
+  delay(3000);
 #endif
 
   // spocte offsety Shift registru vstupu a vystupu
@@ -142,8 +144,15 @@ void initModules() {
     // TODO: vypocet offsetu pro input jeste neni uplne promysleny !!!
     SRoffsetsInput[MODULE_MAX_COUNT + 1 - i] =
       SRoffsetsInput[MODULE_MAX_COUNT + 2 - i] + modulesSRinputWidth[module_types[i - 1]];
-
     SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i - 1]];
+  }
+
+  // snizi o jedna offsety vstupnich registru
+  for (int i = 1; i < MODULE_MAX_COUNT + 2; i++) {
+
+    if (SRoffsetsInput[i] > 0) {
+      SRoffsetsInput[i]--;
+    }
   }
 
 #ifdef DEBUGING_INIT_MODULES
@@ -247,7 +256,7 @@ void loop() {
       settleModules();
     }
 
-    write_to_output_shift_register();
+    update_shift_registers();
 
   }
 
