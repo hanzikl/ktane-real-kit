@@ -111,12 +111,13 @@ void initModules() {
   }
 
   // pozice 0 - modul Simon
-  //module_types[0] = MODULE_TYPE_SIMON;
-  //module_status[0] = MODULE_ARMED;
+  module_types[0] = MODULE_TYPE_SIMON;
+  module_status[0] = MODULE_ARMED;
+
 
   // pozice 0 - modul test output
-  module_types[0] = MODULE_TYPE_TEST_OUTPUT;
-  module_status[0] = MODULE_ARMED;
+  // module_types[0] = MODULE_TYPE_TEST_OUTPUT;
+  // module_status[0] = MODULE_ARMED;
 
 #ifdef DEBUGING_INIT_MODULES
   Serial.print(F("Modules:"));
@@ -161,8 +162,6 @@ void initModules() {
   }
 
 }
-
-
 
 void addStrike() {
 
@@ -244,6 +243,8 @@ void loop() {
       // check_buttons_in_order();
       settleModules();
     }
+
+    write_to_output_shift_register();
 
   }
 
