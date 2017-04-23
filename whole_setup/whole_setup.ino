@@ -66,6 +66,8 @@ byte module_data[MODULE_MAX_COUNT + 1][MODULE_DATA_SIZE + 1];
 
 // each module can have only one byte wide input
 byte shift_register_input[MODULE_MAX_COUNT + 1];
+byte shift_register_previous_input[MODULE_MAX_COUNT + 1];
+
 // modules can have together only limited bytes wide output
 byte shift_register_output[(MODULE_MAX_COUNT * MODULE_MAX_OUTPUT_SIZE) + 1];
 
@@ -95,10 +97,11 @@ void setup()
 
   setup_beeper();
   setup_shift_registers();
+  
   // setup_countdown_display();
   // setup_buttons_in_order();
 
-  initModulesTest();
+  // initModulesTest();
 
 }
 
@@ -241,7 +244,7 @@ void loop() {
     clockTicking = clockTicking && (remainingTime > 0);
 
     /*
-       Here comes the updates of device
+       Here comes the update of modules
     */
 
     // update_countdown_display(currentMillis);

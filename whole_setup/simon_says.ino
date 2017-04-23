@@ -7,11 +7,14 @@
   SETUP FOR SIMON SAYS
 */
 
-byte simon_previous_reading = 0x00;
-
-#define SIMON_STAGE_COUNT 4
+#define SIMON_STAGE_COUNT 2
+#define SIMON_STAGE_STARTING 3
 #define SIMON_BUTTON_COUNT 4
-#define INPUT_MASK_SIMON 0b11110000 // must be inversed
+
+#define SIMON_DELAY_SHORT 500
+#define SIMON_DELAY_LONG 3000
+
+#define INPUT_MASK_SIMON 0b11110000 // must be in reversed order
 // #define OUTPUT_MASK_SIMON 0b01111100
 
 #define SIMON_DISARM_LED 4
@@ -84,6 +87,10 @@ void setNextChangeTime(byte module_number, unsigned long value) {
 void setSequenceByte(byte module_number, byte byte_number, byte value) {
   module_data[module_number][SIMON_DATA_SQ + byte_number] = value;
 }
+
+/**
+   TESTS
+*/
 
 void test_simon_output(byte module_number) {
 
@@ -172,11 +179,42 @@ void test_simon_time(byte module_number) {
 
 }
 
+/**
+   MODULE LOGIC
+*/
+
+
+
+void generate_sequence(byte module_number) {
+
+  setSeqLength(module_number, SIMON_STAGE_COUNT + SIMON_STAGE_STARTING);
+
+  // generate random sequence
+  for (int i = 0; i < SIMON_STAGE_COUNT + SIMON_STAGE_STARTING; i++) {
+    // setSequenceByte(module_number, i, random(SIMON_BUTTON_COUNT));
+    setSequenceByte(module_number, i, 0);
+  }
+
+}
+
+
 void setup_simon(byte module_number) {
+
+  // set neutral previous input
+  // shift_register_previous_input[module_number] = 255;
+
+  generate_sequence(module_number);
+  module_stage[module_number] = SIMON_STAGE_STARTING;
+  setNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);
 
 }
 
 void update_simon(byte module_number) {
+
+  if (module_status[module_number] == MODULE_DISARMED) {
+    byte pos = SRoffsetsOutput[module_number];
+    shift_register_output[pos] = simon_output_connection[SIMON_DISARM_LED];
+  }
 
   if (module_status[module_number] == MODULE_TESTING) {
     test_simon_output(module_number);
@@ -187,9 +225,64 @@ void update_simon(byte module_number) {
     return;
   }
 
-  if (module_status[module_number] == MODULE_DISARMED) {
-    byte pos = SRoffsetsOutput[module_number];
-    shift_register_output[pos] = simon_output_connection[SIMON_DISARM_LED];
+  byte reading = get_module_sanitized_input(module_number, INPUT_MASK_SIMON, true);
+
+  if (module_status[module_number] == MODULE_FAILED_TO_DISARM
+      || module_status[module_number] == MODULE_DISARMING_IN_PROGRESS)  {
+    if (reading == 0) {
+      module_status[module_number] = MODULE_ARMED;
+      shift_register_output[SRoffsetsOutput[module_number]] = 0;
+
+#ifdef DEBUGING_SIMON
+      Serial.println(F("RE-ARMING SIMON"));
+#endif
+    }
+    return;
+  }
+
+
+  switch (reading) {
+    case READING_ERROR:
+      break;
+    case 0:
+      break;
+    default:
+      byte progress = getProgressIn(module_number);
+      byte base = getSequenceByte(module_number, progress);
+#ifdef DEBUGING_SIMON
+      Serial.print("M");
+      Serial.print(module_number);
+      Serial.print(" S");
+      Serial.print(module_stage[module_number]);
+      Serial.print(" P");
+      Serial.print(progress);
+      Serial.print(" B");
+      Serial.print(base);
+      Serial.print(" R");
+      Serial.print(reading);
+      Serial.print(" E");
+      Serial.println(simon_input_connection[simon_rules[base]]);
+
+#endif
+      if (reading == simon_input_connection[simon_rules[base]]) {
+
+        module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
+        progress++;
+        if (progress > module_stage[module_number] - 1) {
+          progress = 0;
+          module_stage[module_number]++;
+        }
+        setProgressIn(module_number, progress);
+      } else {
+        module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
+        addStrike();
+        module_stage[module_number] = SIMON_STAGE_STARTING;
+      }
+
+  }
+
+  if (module_stage[module_number] > SIMON_STAGE_COUNT + SIMON_STAGE_STARTING - 1) {
+    module_status[module_number] = MODULE_DISARMED;
   }
 
 }

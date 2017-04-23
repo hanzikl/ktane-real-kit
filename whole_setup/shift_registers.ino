@@ -33,6 +33,10 @@ void setup_shift_registers() {
   pinMode(SHIFT_REGISTER_OUTPUT_LATCH_PIN, OUTPUT);
   pinMode(SHIFT_REGISTER_OUTPUT_CLOCK_PIN, OUTPUT);
 
+  update_shift_registers();
+  update_shift_registers();
+
+
 }
 
 void write_to_output_shift_register() {
@@ -101,13 +105,32 @@ void read_from_input_shift_register() {
 
 }
 
+void store_previous_reading() {
+
+  byte output_width = SRoffsetsOutput[MODULE_MAX_COUNT + 1];
+
+  for (int i = 0; i < output_width; i++) {
+    shift_register_previous_input[i] = shift_register_input[i];
+  }
+
+}
+
+void clear_previous_reading() {
+  byte output_width = SRoffsetsOutput[MODULE_MAX_COUNT + 1];
+
+  for (int i = 0; i < output_width; i++) {
+    shift_register_previous_input[i] = 0;
+  }
+
+}
+
 void update_shift_registers() {
   write_to_output_shift_register();
+  store_previous_reading();
   read_from_input_shift_register();
 }
 
 void print_input_shift_register() {
-
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     Serial.print(i);
@@ -151,5 +174,51 @@ byte get_module_input(byte module_number, byte module_mask, boolean invert) {
 #endif
 
   return reading;
+}
+
+byte get_module_previous_input(byte module_number, byte module_mask, boolean invert) {
+  int pos = SRoffsetsInput[module_number + 1];
+
+#ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print("ppos:");
+  Serial.println(pos);
+#endif
+
+  byte reading = shift_register_previous_input[pos];
+
+#ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print("pr:");
+  Serial.println(reading);
+#endif
+
+  if (invert) {
+
+    reading = ~reading;
+#ifdef DEBUGING_SR_IN_GETVALUE
+    Serial.print("pinv:");
+    Serial.println(reading);
+#endif
+
+  }
+
+  reading = reading & module_mask;
+
+#ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print("pmsk:");
+  Serial.println(reading);
+#endif
+
+  return reading;
+
+}
+
+byte get_module_sanitized_input(byte module_number, byte module_mask, boolean invert) {
+  byte reading = get_module_input(module_number, module_mask, invert);
+  byte prev_reading = get_module_previous_input(module_number, module_mask, invert);
+  if (reading == prev_reading) {
+    return reading;
+  } else {
+    return READING_ERROR;
+  }
 }
 
