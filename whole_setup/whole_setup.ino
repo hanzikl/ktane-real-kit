@@ -139,7 +139,10 @@ void initModules() {
     Serial.print(modulesSRoutputWidth[module_types[i - 1]]);
     Serial.println();
 #endif
-    SRoffsetsInput[i] = SRoffsetsInput[i - 1] + modulesSRinputWidth[module_types[i - 1]];
+    // TODO: vypocet offsetu pro input jeste neni uplne promysleny !!!
+    SRoffsetsInput[MODULE_MAX_COUNT + 1 - i] =
+      SRoffsetsInput[MODULE_MAX_COUNT + 2 - i] + modulesSRinputWidth[module_types[i - 1]];
+
     SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i - 1]];
   }
 
