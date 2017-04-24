@@ -72,6 +72,12 @@ void administerTests() {
 #ifdef DEBUGING_TESTING
   Serial.println(F("All modules tested"));
 #endif
+
+  delay(200);
+  update_shift_registers();
+  update_shift_registers();
+  delay(200);
+
 }
 
 

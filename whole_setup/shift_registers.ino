@@ -36,7 +36,6 @@ void setup_shift_registers() {
   update_shift_registers();
   update_shift_registers();
 
-
 }
 
 void write_to_output_shift_register() {
