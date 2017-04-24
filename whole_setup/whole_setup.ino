@@ -87,6 +87,9 @@ void setup()
       GENERAL SETUP
   */
 
+  // init random seed
+  randomSeed(analogRead(A0));
+
 #ifdef DEBUGING
   Serial.begin(9600);
 

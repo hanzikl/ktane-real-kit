@@ -8,8 +8,8 @@
   SETUP FOR SIMON SAYS
 */
 
-#define SIMON_STAGE_COUNT 2
-#define SIMON_STAGE_STARTING 3
+#define SIMON_STAGE_COUNT 4
+#define SIMON_STAGE_STARTING 1
 #define SIMON_BUTTON_COUNT 4
 
 #define SIMON_DELAY_SHORT 500
@@ -191,9 +191,9 @@ void generate_sequence(byte module_number) {
 
   // generate random sequence
   for (int i = 0; i < SIMON_STAGE_COUNT + SIMON_STAGE_STARTING; i++) {
-    // setSequenceByte(module_number, i, random(SIMON_BUTTON_COUNT));
+    setSequenceByte(module_number, i, random(SIMON_BUTTON_COUNT));
     // setSequenceByte(module_number, i, 0);
-    setSequenceByte(module_number, i, i % SIMON_BUTTON_COUNT);
+    // setSequenceByte(module_number, i, i % SIMON_BUTTON_COUNT);
   }
 
 }
@@ -236,6 +236,8 @@ void update_simon(byte module_number) {
     if (reading == 0) {
       module_status[module_number] = MODULE_ARMED;
       shift_register_output[pos] = 0;
+      // reset waiting for sequence show output
+      setNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);
 
 #ifdef DEBUGING_SIMON
       Serial.println(F("RE-ARMING SIMON"));
@@ -299,35 +301,53 @@ void update_simon(byte module_number) {
       case 0:
         break;
       default:
-        byte progress = getProgressIn(module_number);
-        byte base = getSequenceByte(module_number, progress);
-#ifdef DEBUGING_SIMON
-        Serial.print("M");
-        Serial.print(module_number);
-        Serial.print(" S");
-        Serial.print(module_stage[module_number]);
-        Serial.print(" P");
-        Serial.print(progress);
-        Serial.print(" B");
-        Serial.print(base);
-        Serial.print(" R");
-        Serial.print(reading);
-        Serial.print(" E");
-        Serial.println(simon_input_connection[simon_rules[base]]);
-#endif
-        if (reading == simon_input_connection[simon_rules[base]]) {
+        {
+          // on any input reset progress on output
+          setProgressOut(module_number, 0);
 
-          module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
-          progress++;
-          if (progress > module_stage[module_number] - 1) {
-            progress = 0;
-            module_stage[module_number]++;
+          byte progress = getProgressIn(module_number);
+          byte base = getSequenceByte(module_number, progress);
+#ifdef DEBUGING_SIMON
+          Serial.print("M");
+          Serial.print(module_number);
+          Serial.print(" S");
+          Serial.print(module_stage[module_number]);
+          Serial.print(" P");
+          Serial.print(progress);
+          Serial.print(" B");
+          Serial.print(base);
+          Serial.print(" R");
+          Serial.print(reading);
+          Serial.print(" E");
+          Serial.println(simon_input_connection[simon_rules[base]]);
+#endif
+          if (reading == simon_input_connection[simon_rules[base]]) {
+
+            module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
+            // turn on corresponding LED
+            shift_register_output[pos] = simon_output_connection[simon_rules[base]];
+
+            progress++;
+            if (progress > module_stage[module_number] - 1) {
+              progress = 0;
+              module_stage[module_number]++;
+            }
+            setProgressIn(module_number, progress);
+          } else {
+
+            // figure out, which button is on
+            for (int i = 0; i < 4; i++) {
+              if (reading == simon_input_connection[i]) {
+                // turn on corresponding LED
+                shift_register_output[pos] = simon_output_connection[i];
+                break;
+              }
+            }
+
+            module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
+            addStrike();
+            module_stage[module_number] = SIMON_STAGE_STARTING;
           }
-          setProgressIn(module_number, progress);
-        } else {
-          module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
-          addStrike();
-          module_stage[module_number] = SIMON_STAGE_STARTING;
         }
     }
   }
