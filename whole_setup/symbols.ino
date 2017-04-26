@@ -12,6 +12,8 @@
 #define SYMBOLS_DELAY_SHORT 500
 #define SYMBOLS_DELAY_LONG 3000
 
+#define SYMBOLS_WRONG_BLINK_TIME 100
+
 #define INPUT_MASK_SYMBOLS 0b11110000 // must be in reversed order
 
 #define SYMBOLS_DISARM_LED 4
@@ -135,6 +137,9 @@ void setup_symbols(byte module_number) {
 
   module_stage[module_number] = 0;
 
+  setSymbolsCorrectButtons(module_number, 0);
+  setSymbolsWrongButtons(module_number, 0);
+
   setSymbolsSequenceByte(module_number, 0, 0);
   setSymbolsSequenceByte(module_number, 1, 1);
   setSymbolsSequenceByte(module_number, 2, 2);
@@ -176,11 +181,12 @@ void update_symbols(byte module_number) {
     return;
   }
 
-  /*
-     SYMBOLS OUTPUT
-  */
 
   if (clockTicking) {
+
+    /*
+       SYMBOLS OUTPUT
+    */
 
 #ifdef DEBUGING_SYMBOLS_OUTPUT
     Serial.print("M");
@@ -188,6 +194,14 @@ void update_symbols(byte module_number) {
     Serial.print(" S");
     Serial.print(module_stage[module_number]);
 #endif
+
+    byte output_value = getSymbolsCorrectButtons(module_number);
+    if (millis() % (SYMBOLS_WRONG_BLINK_TIME * 2) > SYMBOLS_WRONG_BLINK_TIME) {
+      // show both correct and wrong buttons
+      output_value += getSymbolsWrongButtons(module_number);
+    }
+
+    shift_register_output[pos] = output_value;
 
     /*
        SYMBOLS INPUT
@@ -213,9 +227,15 @@ void update_symbols(byte module_number) {
           if (reading == symbols_input_connection[base]) {
 
             module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
-            // turn on corresponding LED
-            // todo: turn them on permanently
-            shift_register_output[pos] = symbols_output_connection[base];
+            // add to correct buttons
+            setSymbolsCorrectButtons(module_number,
+                                     getSymbolsCorrectButtons(module_number)
+                                     + symbols_output_connection[base]);
+
+            // reset wrong buttons
+            setSymbolsWrongButtons(module_number, 0);
+
+            shift_register_output[pos] = getSymbolsCorrectButtons(module_number);
 
             module_stage[module_number]++;
           } else {
@@ -224,8 +244,12 @@ void update_symbols(byte module_number) {
             for (int i = 0; i < 4; i++) {
               if (reading == symbols_input_connection[i]) {
                 // turn on corresponding LED
-                // todo: set them blink permanently
-                shift_register_output[pos] = symbols_output_connection[i];
+
+                // add to wrong buttons
+                // FIXME: do not add if it is already there
+                setSymbolsWrongButtons(module_number,
+                                       getSymbolsWrongButtons(module_number)
+                                       + symbols_output_connection[i]);
                 break;
               }
             }
