@@ -246,10 +246,13 @@ void update_symbols(byte module_number) {
                 // turn on corresponding LED
 
                 // add to wrong buttons
-                // FIXME: do not add if it is already there
-                setSymbolsWrongButtons(module_number,
-                                       getSymbolsWrongButtons(module_number)
-                                       + symbols_output_connection[i]);
+                byte wrong = getSymbolsWrongButtons(module_number);
+                byte ok = getSymbolsCorrectButtons(module_number);
+                byte wrong_plus = symbols_output_connection[i];
+
+                if ((wrong_plus & (ok | wrong)) == 0) {
+                  setSymbolsWrongButtons(module_number, wrong + wrong_plus);
+                }
                 break;
               }
             }
