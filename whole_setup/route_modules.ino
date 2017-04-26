@@ -14,6 +14,9 @@ void call_module_setup(byte module_number) {
     case MODULE_TYPE_SIMON:
       setup_simon(module_number);
       break;
+    case MODULE_TYPE_SYMBOLS:
+      setup_symbols(module_number);
+      break;
     case MODULE_TYPE_TEST_OUTPUT:
       setup_testmodule_output(module_number);
       break;
@@ -26,6 +29,9 @@ void call_module_update(byte module_number) {
   switch (module_types[module_number]) {
     case MODULE_TYPE_SIMON:
       update_simon(module_number);
+      break;
+    case MODULE_TYPE_SYMBOLS:
+      update_symbols(module_number);
       break;
     case MODULE_TYPE_TEST_OUTPUT:
       update_testmodule_output(module_number);

@@ -37,19 +37,19 @@ byte simon_stage = 0;
 /*
    Getting and setting data
 */
-byte getProgressOut(byte module_number) {
+byte getSimonProgressOut(byte module_number) {
   return module_data[module_number][SIMON_DATA_PO];
 }
 
-byte getProgressIn(byte module_number) {
+byte getSimonProgressIn(byte module_number) {
   return module_data[module_number][SIMON_DATA_PI];
 }
 
-byte getSeqLength(byte module_number) {
+byte getSimonSeqLength(byte module_number) {
   return module_data[module_number][SIMON_DATA_SL];
 }
 
-unsigned long getNextChangeTime(byte module_number) {
+unsigned long getSimonNextChangeTime(byte module_number) {
 
   unsigned long value = 0;
   value = (value << 8) + module_data[module_number][SIMON_DATA_NX];
@@ -60,23 +60,23 @@ unsigned long getNextChangeTime(byte module_number) {
   return value;
 }
 
-byte getSequenceByte(byte module_number, byte byte_number) {
+byte getSimonSequenceByte(byte module_number, byte byte_number) {
   return module_data[module_number][SIMON_DATA_SQ + byte_number];
 }
 
-void setProgressOut(byte module_number, byte value) {
+void setSimonProgressOut(byte module_number, byte value) {
   module_data[module_number][SIMON_DATA_PO] = value;
 }
 
-void setProgressIn(byte module_number, byte value) {
+void setSimonProgressIn(byte module_number, byte value) {
   module_data[module_number][SIMON_DATA_PI] = value;
 }
 
-void setSeqLength(byte module_number, byte value) {
+void setSimonSeqLength(byte module_number, byte value) {
   module_data[module_number][SIMON_DATA_SL] = value;
 }
 
-void setNextChangeTime(byte module_number, unsigned long value) {
+void setSimonNextChangeTime(byte module_number, unsigned long value) {
 
   module_data[module_number][SIMON_DATA_NX] = (value >> 24) & 0xFF;
   module_data[module_number][SIMON_DATA_NX + 1] = (value >> 16) & 0xFF;
@@ -85,7 +85,7 @@ void setNextChangeTime(byte module_number, unsigned long value) {
 
 }
 
-void setSequenceByte(byte module_number, byte byte_number, byte value) {
+void setSimonSequenceByte(byte module_number, byte byte_number, byte value) {
   module_data[module_number][SIMON_DATA_SQ + byte_number] = value;
 }
 
@@ -166,9 +166,9 @@ void test_simon_time(byte module_number) {
      not used
   */
   unsigned long tt = millis();
-  setNextChangeTime(module_number, tt);
+  setSimonNextChangeTime(module_number, tt);
 
-  unsigned long ss = getNextChangeTime(module_number);
+  unsigned long ss = getSimonNextChangeTime(module_number);
 
   Serial.print(F("TT:"));
   if (ss == tt) {
@@ -185,15 +185,15 @@ void test_simon_time(byte module_number) {
 
 
 
-void generate_sequence(byte module_number) {
+void simon_generate_sequence(byte module_number) {
 
-  setSeqLength(module_number, SIMON_STAGE_COUNT + SIMON_STAGE_STARTING);
+  setSimonSeqLength(module_number, SIMON_STAGE_COUNT + SIMON_STAGE_STARTING);
 
   // generate random sequence
   for (int i = 0; i < SIMON_STAGE_COUNT + SIMON_STAGE_STARTING; i++) {
-    setSequenceByte(module_number, i, random(SIMON_BUTTON_COUNT));
-    // setSequenceByte(module_number, i, 0);
-    // setSequenceByte(module_number, i, i % SIMON_BUTTON_COUNT);
+    setSimonSequenceByte(module_number, i, random(SIMON_BUTTON_COUNT));
+    // setSimonSequenceByte(module_number, i, 0);
+    // setSimonSequenceByte(module_number, i, i % SIMON_BUTTON_COUNT);
   }
 
 }
@@ -203,11 +203,11 @@ void setup_simon(byte module_number) {
   // set neutral previous input
   // shift_register_previous_input[module_number] = 255;
 
-  generate_sequence(module_number);
+  simon_generate_sequence(module_number);
   module_stage[module_number] = SIMON_STAGE_STARTING;
-  setNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);
-  setProgressOut(module_number, 0);
-  setProgressIn(module_number, 0);
+  setSimonNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);
+  setSimonProgressOut(module_number, 0);
+  setSimonProgressIn(module_number, 0);
 
 }
 
@@ -237,7 +237,7 @@ void update_simon(byte module_number) {
       module_status[module_number] = MODULE_ARMED;
       shift_register_output[pos] = 0;
       // reset waiting for sequence show output
-      setNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);
+      setSimonNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);
 
 #ifdef DEBUGING_SIMON
       Serial.println(F("RE-ARMING SIMON"));
@@ -249,12 +249,12 @@ void update_simon(byte module_number) {
   /*
      SIMON OUTPUT
   */
-  unsigned long next_time = getNextChangeTime(module_number);
+  unsigned long next_time = getSimonNextChangeTime(module_number);
 
   if (clockTicking) {
 
     if (millis() > next_time) {
-      byte progress = getProgressOut(module_number);
+      byte progress = getSimonProgressOut(module_number);
 #ifdef DEBUGING_SIMON_OUTPUT
       Serial.print("M");
       Serial.print(module_number);
@@ -271,7 +271,7 @@ void update_simon(byte module_number) {
         Serial.println();
 #endif
       } else {
-        byte base = getSequenceByte(module_number, progress / 2);
+        byte base = getSimonSequenceByte(module_number, progress / 2);
         shift_register_output[pos] = simon_output_connection[base];
 #ifdef DEBUGING_SIMON_OUTPUT
         Serial.print(" B");
@@ -287,8 +287,8 @@ void update_simon(byte module_number) {
       }
 
       next_time += SIMON_DELAY_SHORT;
-      setNextChangeTime(module_number, next_time);
-      setProgressOut(module_number, progress);
+      setSimonNextChangeTime(module_number, next_time);
+      setSimonProgressOut(module_number, progress);
 
     }
 
@@ -303,10 +303,10 @@ void update_simon(byte module_number) {
       default:
         {
           // on any input reset progress on output
-          setProgressOut(module_number, 0);
+          setSimonProgressOut(module_number, 0);
 
-          byte progress = getProgressIn(module_number);
-          byte base = getSequenceByte(module_number, progress);
+          byte progress = getSimonProgressIn(module_number);
+          byte base = getSimonSequenceByte(module_number, progress);
 #ifdef DEBUGING_SIMON
           Serial.print("M");
           Serial.print(module_number);
@@ -332,7 +332,7 @@ void update_simon(byte module_number) {
               progress = 0;
               module_stage[module_number]++;
             }
-            setProgressIn(module_number, progress);
+            setSimonProgressIn(module_number, progress);
           } else {
 
             // figure out, which button is on

@@ -100,7 +100,7 @@ void setup()
 
   setup_beeper();
   setup_shift_registers();
-  
+
   // setup_countdown_display();
   // setup_buttons_in_order();
 
@@ -118,10 +118,14 @@ void initModules() {
     }
   }
 
-  // pozice 0 - modul Simon
-  module_types[0] = MODULE_TYPE_SIMON;
-  module_status[0] = MODULE_ARMED;
 
+  // pozice 0 - modul Simon
+  // module_types[0] = MODULE_TYPE_SIMON;
+  // module_status[0] = MODULE_ARMED;
+
+  // pozice 0 - modul Symbols
+  module_types[0] = MODULE_TYPE_SYMBOLS;
+  module_status[0] = MODULE_ARMED;
 
   // pozice 0 - modul test output
   // module_types[0] = MODULE_TYPE_TEST_OUTPUT;
@@ -136,7 +140,7 @@ void initModules() {
     Serial.print(module_types[i]);
   }
   Serial.println();
-  delay(3000);
+  delay(500);
 #endif
 
   // spocte offsety Shift registru vstupu a vystupu
