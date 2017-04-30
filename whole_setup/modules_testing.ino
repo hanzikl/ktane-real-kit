@@ -19,6 +19,10 @@ void initModulesTest() {
     if (module_types[i] != MODULE_TYPE_MISSING) {
       // a spustime na nem test
       module_tested = i;
+#ifdef DEBUGING_TESTING
+      Serial.print(F("Testing module: "));
+      Serial.println(module_tested);
+#endif
       module_status[i] = MODULE_TESTING;
       module_stage[i] = 0;
       break;

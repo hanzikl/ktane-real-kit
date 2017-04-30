@@ -20,6 +20,9 @@ void call_module_setup(byte module_number) {
     case MODULE_TYPE_TEST_OUTPUT:
       setup_testmodule_output(module_number);
       break;
+    case MODULE_TYPE_DISPLAY:
+      setup_display(module_number);
+      break;
     default:
       ;
   }
@@ -35,6 +38,9 @@ void call_module_update(byte module_number) {
       break;
     case MODULE_TYPE_TEST_OUTPUT:
       update_testmodule_output(module_number);
+      break;
+    case MODULE_TYPE_DISPLAY:
+      update_display(module_number);
       break;
     default:
       ;

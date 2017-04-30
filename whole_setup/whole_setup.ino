@@ -14,7 +14,7 @@ double clockSpeedFactor = 1;
 boolean modules_testing = false;
 
 byte strikes = 0;
-byte max_strikes = 1;
+byte max_strikes = 2;
 
 #define MODULE_TESTING 0
 #define MODULE_DISARMED 1
@@ -37,7 +37,7 @@ byte max_strikes = 1;
 
 // pocet bajtu na modul podle typu:
 const byte modulesSRinputWidth[] = {0, 0, 1, 1, 1, 1, 1, 1, 0, 1};
-const byte modulesSRoutputWidth[] = {0, 5, 1, 1, 1, 1, 6, 1, 2, 0};
+const byte modulesSRoutputWidth[] = {0, 3, 1, 1, 1, 1, 6, 1, 2, 0};
 
 #define READING_ERROR 255
 
@@ -51,6 +51,24 @@ const byte modulesSRoutputWidth[] = {0, 5, 1, 1, 1, 1, 6, 1, 2, 0};
 #define MODULE_MAX_COUNT 6
 #define MODULE_DATA_SIZE 41
 #define MODULE_MAX_OUTPUT_SIZE 6
+
+// digits definition
+const byte DIGIT_DEFINITION[] = {
+  0b00111111, // 0
+  0b00000110, // 1
+  0b01011011, // 2
+  0b01001111, // 3
+  0b01100110, // 4
+  0b01101101, // 5
+  0b01111101, // 6
+  0b00000111, // 7
+  0b01111111, // 8
+  0b01101111, // 9
+  0b10000000, // dot
+};
+
+// 4byte 7segment current digit
+byte segment_digit = 0;
 
 /*
    MODULES STATUS
@@ -120,23 +138,28 @@ void initModules() {
 
 
   // pozice 0 - modul Simon
-  // module_types[0] = MODULE_TYPE_SIMON;
-  // module_status[0] = MODULE_ARMED;
+  module_types[0] = MODULE_TYPE_SIMON;
+  module_status[0] = MODULE_ARMED;
 
   // pozice 0 - modul Symbols
-  module_types[0] = MODULE_TYPE_SYMBOLS;
-  module_status[0] = MODULE_ARMED;
+  //  module_types[0] = MODULE_TYPE_SYMBOLS;
+  //  module_status[0] = MODULE_ARMED;
 
   // pozice 0 - modul test output
   // module_types[0] = MODULE_TYPE_TEST_OUTPUT;
   // module_status[0] = MODULE_ARMED;
+
+  // pozice 1 - modul Display
+  module_types[1] = MODULE_TYPE_DISPLAY;
+  module_status[1] = MODULE_DISARMED;
+
 
 #ifdef DEBUGING_INIT_MODULES
   Serial.print(F("Modules:"));
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     Serial.print(" #");
     Serial.print(i);
-    Serial.print(" m");
+    Serial.print(":m");
     Serial.print(module_types[i]);
   }
   Serial.println();
@@ -151,7 +174,7 @@ void initModules() {
     Serial.print(modulesSRoutputWidth[module_types[i - 1]]);
     Serial.println();
 #endif
-    // TODO: vypocet offsetu pro input jeste neni uplne promysleny !!!
+    // TODO: vypocet offsetu jeste neni uplne promysleny !!!
     SRoffsetsInput[MODULE_MAX_COUNT + 1 - i] =
       SRoffsetsInput[MODULE_MAX_COUNT + 2 - i] + modulesSRinputWidth[module_types[i - 1]];
     SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i - 1]];
@@ -181,6 +204,11 @@ void initModules() {
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     call_module_setup(i);
+#ifdef DEBUGING_INIT_MODULES
+    Serial.print(F("InitOk:"));
+    Serial.println(i);
+#endif
+
   }
 
 }
@@ -200,7 +228,7 @@ void addStrike() {
     return;
   }
 
-  clockSpeedFactor *= 1.5;
+  clockSpeedFactor *= 1.0;
 
 #ifdef DEBUGING
   Serial.print(F("Current clock speed factor is "));
@@ -267,6 +295,11 @@ void loop() {
     }
 
     update_shift_registers();
+
+    segment_digit++;
+    if (segment_digit > 3) {
+      segment_digit = 0;
+    }
 
   }
 

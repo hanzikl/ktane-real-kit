@@ -49,7 +49,8 @@ void write_to_output_shift_register() {
 
   digitalWrite(SHIFT_REGISTER_OUTPUT_LATCH_PIN, LOW);
 
-  for (int i = 0; i < output_width; i++) {
+  for (int i = output_width - 1; i >=0; i--) {
+    // sending backwards
 
 #ifdef DEBUGING_SR_OUT
     Serial.print(i);
