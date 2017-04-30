@@ -28,22 +28,31 @@ void call_module_setup(byte module_number) {
   }
 }
 
-void call_module_update(byte module_number) {
+void call_module_update(byte module_number, boolean output_only) {
+
+  // call these modules everytime
   switch (module_types[module_number]) {
-    case MODULE_TYPE_SIMON:
-      update_simon(module_number);
-      break;
-    case MODULE_TYPE_SYMBOLS:
-      update_symbols(module_number);
-      break;
-    case MODULE_TYPE_TEST_OUTPUT:
-      update_testmodule_output(module_number);
-      break;
     case MODULE_TYPE_DISPLAY:
-      update_display(module_number);
+      update_display(module_number, output_only);
       break;
     default:
       ;
+  }
+
+  if (!output_only) {
+    // call these modules only when need to update whole module
+
+    switch (module_types[module_number]) {
+      case MODULE_TYPE_SIMON:
+        update_simon(module_number);
+        break;
+      case MODULE_TYPE_SYMBOLS:
+        update_symbols(module_number);
+        break;
+      case MODULE_TYPE_TEST_OUTPUT:
+        update_testmodule_output(module_number);
+        break;
+    }
   }
 }
 

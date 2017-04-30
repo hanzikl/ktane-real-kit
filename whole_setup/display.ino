@@ -4,6 +4,9 @@
 
 #define DISPLAY_DIGITS_OFFSET 1
 
+int display_previous_second = 0;
+
+
 byte getStrikesDisplayByte(byte max_strikes, byte strikes) {
   if (max_strikes == 0) {
     return 0;
@@ -61,14 +64,6 @@ void show_strikes(byte module_number) {
 void showDigit(byte minutes, byte seconds, byte module_number) {
   // segment_digit is global variable for all modules
 
-  #ifdef DEBUGING_DISPLAY
-    Serial.print(minutes);
-    Serial.print(":");
-    Serial.print(seconds);
-    Serial.print(" ");
-    Serial.print(segment_digit);
-  #endif
-  
   byte data = 0;
   switch (segment_digit) {
     case 0:
@@ -91,14 +86,6 @@ void showDigit(byte minutes, byte seconds, byte module_number) {
       ;
   }
 
-  #ifdef DEBUGING_DISPLAY
-    Serial.print(":");
-    Serial.print(data, BIN);
-    Serial.print(" ");
-    Serial.println(8 >> segment_digit, BIN);
-  #endif
-
-
   shift_register_output[SRoffsetsOutput[module_number] + DISPLAY_DIGITS_OFFSET + 1] = data;
   shift_register_output[SRoffsetsOutput[module_number] + DISPLAY_DIGITS_OFFSET] = 8 >> segment_digit;
 
@@ -114,6 +101,15 @@ void show_time(byte module_number) {
   temptime = (temptime - seconds) / 60;
 
   byte minutes = temptime % 60;
+
+#ifdef DEBUGING_DISPLAY
+  if (display_previous_second != seconds) {
+    Serial.print(minutes);
+    Serial.print(":");
+    Serial.println(seconds);
+    display_previous_second = seconds;
+  }
+#endif
 
   if (remainingTime >= 60 * 1000l) {
     // cas je nad jednu minutu, ukazujeme minuty a sekundy
@@ -131,7 +127,11 @@ void setup_display(byte module_number) {
 
 }
 
-void update_display(byte module_number) {
+void update_display(byte module_number, boolean output_only) {
+
+  if (output_only) {
+    ; // display is as the whole output only, need no special care here
+  }
 
   if (module_status[module_number] == MODULE_TESTING) {
 #ifdef DEBUGING_DISPLAY

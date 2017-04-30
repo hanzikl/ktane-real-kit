@@ -6,7 +6,9 @@
 
 long remainingTime = 1 * 75 * 1000l; // in millis
 unsigned long previousMillis = 0; // time helper
+unsigned long previousDisplayMillis = 0; // time helper
 const long interval = 7; // how often should system react in millis
+const long display_interval = 1; // how often should the output be refreshed
 
 boolean clockTicking = true;
 double clockSpeedFactor = 1;
@@ -118,9 +120,6 @@ void setup()
 
   setup_beeper();
   setup_shift_registers();
-
-  // setup_countdown_display();
-  // setup_buttons_in_order();
 
   // initModulesTest();
 
@@ -260,7 +259,6 @@ void settleModules() {
 
 }
 
-
 void loop() {
 
   if (modules_testing) {
@@ -268,40 +266,55 @@ void loop() {
   }
 
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval) {
 
-    if (clockTicking) {
-      remainingTime -= (long) round((currentMillis - previousMillis) * clockSpeedFactor);
+  if (currentMillis - previousDisplayMillis >= display_interval) {
+
+    previousDisplayMillis = currentMillis;
+
+    if (currentMillis - previousMillis >= interval) {
+      // update modules completely
+
+      if (clockTicking) {
+        remainingTime -= (long) round((currentMillis - previousMillis) * clockSpeedFactor);
+      }
+
+      previousMillis = currentMillis;
+
+      clockTicking = clockTicking && (remainingTime > 0);
+
+      /*
+         Here comes the update of modules
+      */
+
+      update_beeper(remainingTime);
+
+      for (int i = 0; i < MODULE_MAX_COUNT; i++) {
+        call_module_update(i, false);
+      }
+
+      if (clockTicking) {
+        // check_buttons_in_order();
+        settleModules();
+      }
+
+      update_shift_registers();
+
+    } else {
+      // update only output of modules
+
+      for (int i = 0; i < MODULE_MAX_COUNT; i++) {
+        call_module_update(i, true); // true for output only
+      }
+
+      write_to_output_shift_register();
     }
 
-    previousMillis = currentMillis;
-
-    clockTicking = clockTicking && (remainingTime > 0);
-
-    /*
-       Here comes the update of modules
-    */
-
-    // update_countdown_display(currentMillis);
-    update_beeper(remainingTime);
-
-    for (int i = 0; i < MODULE_MAX_COUNT; i++) {
-      call_module_update(i);
-    }
-
-    if (clockTicking) {
-      // check_buttons_in_order();
-      settleModules();
-    }
-
-    update_shift_registers();
-
+    // change shown digit of 7segment displays
     segment_digit++;
     if (segment_digit > 3) {
       segment_digit = 0;
     }
 
   }
-
 }
 
