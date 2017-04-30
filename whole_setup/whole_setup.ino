@@ -4,14 +4,16 @@
    GENERAL SETUP
 */
 
+long boomTime = 0;
 long remainingTime = 1 * 75 * 1000l; // in millis
 unsigned long previousMillis = 0; // time helper
 unsigned long previousDisplayMillis = 0; // time helper
 const long interval = 7; // how often should system react in millis
-const long display_interval = 1; // how often should the output be refreshed
+const long display_interval = 4; // how often should the output be refreshed
 
 boolean clockTicking = true;
 double clockSpeedFactor = 1;
+double clockSpeedUp = 1.2;
 
 boolean modules_testing = false;
 
@@ -220,6 +222,7 @@ void addStrike() {
 
   strikes++;
   if (strikes > max_strikes) {
+    boomTime = remainingTime;
     remainingTime = 0;
 #ifdef DEBUGING
     Serial.println(F("IT IS OVER NOW!"));
@@ -227,7 +230,7 @@ void addStrike() {
     return;
   }
 
-  clockSpeedFactor *= 1.0;
+  clockSpeedFactor *= clockSpeedUp;
 
 #ifdef DEBUGING
   Serial.print(F("Current clock speed factor is "));

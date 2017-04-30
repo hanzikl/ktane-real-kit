@@ -3,9 +3,13 @@
 #endif
 
 #define DISPLAY_DIGITS_OFFSET 1
+#define DISPLAY_DIGITS_COUNT 4
+#define DISPLAY_SHORT_BLINK 250
 
 int display_previous_second = 0;
 
+boolean dot_blinked = false;
+boolean show_boomtime = false;
 
 byte getStrikesDisplayByte(byte max_strikes, byte strikes) {
   if (max_strikes == 0) {
@@ -61,37 +65,61 @@ void show_strikes(byte module_number) {
   shift_register_output[SRoffsetsOutput[module_number]] = getStrikesDisplayByte(max_strikes, strikes);
 }
 
-void showDigit(byte minutes, byte seconds, byte module_number) {
-  // segment_digit is global variable for all modules
-
-  byte data = 0;
-  switch (segment_digit) {
-    case 0:
-      data = ~(DIGIT_DEFINITION[(minutes / 10) & 0x7f]);
-      break;
-
-    case 1:
-      data = ~(DIGIT_DEFINITION[(minutes % 10) & 0x7f]);
-      break;
-
-    case 2:
-      data = ~(DIGIT_DEFINITION[(seconds / 10) & 0x7f]);
-      break;
-
-    case 3:
-      data = ~(DIGIT_DEFINITION[(seconds % 10) & 0x7f]);
-      break;
-
-    default:
-      ;
+void showOneDigit(byte digit, byte digit_position, boolean has_dot, byte module_number) {
+  byte data = ~(DIGIT_DEFINITION[digit & 0x7f]);
+  if (has_dot) {
+    data &= 0x7f; // add dot = remove it's bit
   }
 
   shift_register_output[SRoffsetsOutput[module_number] + DISPLAY_DIGITS_OFFSET + 1] = data;
-  shift_register_output[SRoffsetsOutput[module_number] + DISPLAY_DIGITS_OFFSET] = 8 >> segment_digit;
+  shift_register_output[SRoffsetsOutput[module_number] + DISPLAY_DIGITS_OFFSET] = 8 >> digit_position;
+}
+
+boolean displayShouldHaveDot(int heremillis) {
+  // TODO: this function and similiar for a beeper could be joined
+
+  // blink speed according to remaining time
+  int blinkSpeedInversion = 1000;
+  if (remainingTime < BEEPER_SPEED_LEVEL_ONE_SECONDS * 1000) {
+    blinkSpeedInversion = BEEPER_SPEED_LEVEL_ONE_INV;
+  }
+
+  if (remainingTime < BEEPER_SPEED_LEVEL_TWO_SECONDS * 1000) {
+    blinkSpeedInversion = BEEPER_SPEED_LEVEL_TWO_INV;
+  }
+
+  return !(clockTicking) || (heremillis % blinkSpeedInversion < blinkSpeedInversion / 2);
+}
+
+void showTimePart(byte minutes, byte seconds, int heremillis, byte module_number) {
+  // segment_digit is global variable for all modules
+
+  switch (segment_digit) {
+    case 0:
+      showOneDigit(minutes / 10, segment_digit, false, module_number);
+      break;
+    case 1:
+      showOneDigit(minutes % 10, segment_digit, displayShouldHaveDot(heremillis), module_number);
+      break;
+    case 2:
+      showOneDigit(seconds / 10, segment_digit, false, module_number);
+      break;
+    case 3:
+      showOneDigit(seconds % 10, segment_digit, false, module_number);
+      break;
+    default:
+      ;
+  }
+}
+
+void show_empty_display(byte module_number) {
+
+  shift_register_output[SRoffsetsOutput[module_number] + DISPLAY_DIGITS_OFFSET + 1] = 255;
+  shift_register_output[SRoffsetsOutput[module_number] + DISPLAY_DIGITS_OFFSET] = 0;
 
 }
 
-void show_time(byte module_number) {
+void show_time(long remainingTime, byte module_number) {
   long temptime = remainingTime;
   int heremillis = temptime % 1000l;
 
@@ -113,10 +141,10 @@ void show_time(byte module_number) {
 
   if (remainingTime >= 60 * 1000l) {
     // cas je nad jednu minutu, ukazujeme minuty a sekundy
-    showDigit(minutes, seconds, module_number);
+    showTimePart(minutes, seconds, heremillis, module_number);
   } else {
     // ukazujeme sekundy a 2 cifry milisekund
-    showDigit(seconds, heremillis / 10, module_number);
+    showTimePart(seconds, heremillis / 10, heremillis, module_number);
   }
 
 }
@@ -155,8 +183,15 @@ void update_display(byte module_number, boolean output_only) {
   */
 
   show_strikes(module_number);
-
-  show_time(module_number);
+  if (remainingTime > 0) {
+    show_time(remainingTime, module_number);
+  } else {
+    if (millis() % DISPLAY_SHORT_BLINK > DISPLAY_SHORT_BLINK / 2.5) {
+      show_empty_display(module_number);
+    } else {
+      show_time(boomTime, module_number);
+    }
+  }
 
 }
 
