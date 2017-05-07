@@ -1,5 +1,5 @@
 #ifdef DEBUGING
-#define DEBUGING_DISPLAY
+//#define DEBUGING_DISPLAY
 #endif
 
 #define DISPLAY_DIGITS_OFFSET 1

@@ -1,12 +1,12 @@
 #ifdef DEBUGING
-#define DEBUGING_BEEPER
+//#define DEBUGING_BEEPER
 #endif
 
 /*
   SETUP FOR BEEPER
 */
 
-#define BEEPER_PIN 2
+#define BEEPER_PIN 12
 #define BEEPER_BEEP_LENGTH 30
 #define BEEPER_SPEED_LEVEL_ONE_SECONDS 10
 #define BEEPER_SPEED_LEVEL_ONE_INV 500 // more is slower
@@ -47,6 +47,9 @@ void update_beeper(long currentMillis) {
 
   if (beeper_on) {
     digitalWrite(BEEPER_PIN, HIGH);
+#ifdef DEBUGING_BEEPER
+    Serial.println(F("BEEP"));
+#endif
   } else {
     digitalWrite(BEEPER_PIN, LOW);
   }
