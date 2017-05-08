@@ -93,8 +93,12 @@ void maze_randomize_position(byte module_number) {
 void maze_generate(byte module_number) {
 
   for (byte p = 0; p < 6 * 6; p++) {
-    // setMazeWallAt(module_number, p, random(2 * MAZE_LEFT));
-    setMazeWallAt(module_number, p, 0);
+    byte wall = 0;
+    if (random(5) < 3) {
+      wall = random(2 * MAZE_LEFT);
+    }
+    setMazeWallAt(module_number, p, wall);
+    // setMazeWallAt(module_number, p, 0);
   }
 
   byte start_pos = random(6 * 6);
@@ -118,7 +122,7 @@ void print_maze(byte module_number) {
       byte p = y * 6 + x;
       wall = getMazeWallAt(module_number, p);
       if (wall & MAZE_TOP) {
-        Serial.print(F("-*-"));
+        Serial.print(F("-=-"));
       } else {
         Serial.print(F("- -"));
       }
@@ -129,7 +133,7 @@ void print_maze(byte module_number) {
       byte p = y * 6 + x;
       wall = getMazeWallAt(module_number, p);
       if (wall & MAZE_LEFT) {
-        Serial.print(F("*"));
+        Serial.print(F("|"));
       } else {
         Serial.print(F(" "));
       }
@@ -144,7 +148,7 @@ void print_maze(byte module_number) {
       }
 
       if (wall & MAZE_RIGHT) {
-        Serial.print(F("*"));
+        Serial.print(F("|"));
       } else {
         Serial.print(F(" "));
       }
@@ -155,7 +159,7 @@ void print_maze(byte module_number) {
       byte p = y * 6 + x;
       wall = getMazeWallAt(module_number, p);
       if (wall & MAZE_BOTTOM) {
-        Serial.print(F("-*-"));
+        Serial.print(F("-=-"));
       } else {
         Serial.print(F("- -"));
       }
