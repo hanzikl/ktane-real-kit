@@ -123,7 +123,7 @@ void setup()
   setup_beeper();
   setup_shift_registers();
 
-  // initModulesTest();
+  initModulesTest();
 
 }
 
@@ -139,7 +139,11 @@ void initModules() {
 
 
   // pozice 0 - modul Simon
-  module_types[0] = MODULE_TYPE_SIMON;
+  //  module_types[0] = MODULE_TYPE_SIMON;
+  //  module_status[0] = MODULE_ARMED;
+
+  // pozice 0 - modul Maze
+  module_types[0] = MODULE_TYPE_MAZE;
   module_status[0] = MODULE_ARMED;
 
   // pozice 0 - modul Symbols

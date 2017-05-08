@@ -23,6 +23,9 @@ void call_module_setup(byte module_number) {
     case MODULE_TYPE_DISPLAY:
       setup_display(module_number);
       break;
+    case MODULE_TYPE_MAZE:
+      setup_maze(module_number);
+      break;
     default:
       ;
   }
@@ -48,6 +51,9 @@ void call_module_update(byte module_number, boolean output_only) {
         break;
       case MODULE_TYPE_SYMBOLS:
         update_symbols(module_number);
+        break;
+      case MODULE_TYPE_MAZE:
+        update_maze(module_number);
         break;
       case MODULE_TYPE_TEST_OUTPUT:
         update_testmodule_output(module_number);
