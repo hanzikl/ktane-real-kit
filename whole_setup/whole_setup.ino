@@ -123,7 +123,7 @@ void setup()
   setup_beeper();
   setup_shift_registers();
 
-  initModulesTest();
+  // initModulesTest();
 
 }
 
