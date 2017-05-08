@@ -24,6 +24,8 @@
 #define MAZE_DATA_PT2 3
 #define MAZE_DATA_MZ 4
 
+const byte maze_input_connection[] = {16, 32, 64, 128};
+
 LedControl lc = LedControl(MAZE_OUTPUT_DATA_PIN, MAZE_OUTPUT_CLOCK_PIN, MAZE_OUTPUT_LOAD_PIN, MAZE_MAX_MODULE_COUNT);
 
 /*
@@ -120,6 +122,49 @@ void test_maze_output(byte module_number) {
 
 }
 
+void test_maze_input(byte module_number) {
+  int delayTime = 50; // ms
+
+  boolean have[5] = {false, false, false, false};
+
+  while (true) {
+
+    update_shift_registers();
+    delay(delayTime);
+
+    byte input_value = get_module_input(module_number, INPUT_MASK_MAZE, true);
+
+    // figure out, which button is on
+    for (int i = 0; i < 4; i++) {
+      if (input_value == maze_input_connection[i]) {
+        have[i] = true;
+        switch (i) {
+          case 0: // TOP
+            lc.setRow(0, 7, 0b00011000);
+            break;
+          case 1: // RIGHT
+            lc.setColumn(0, 0, 0b00011000);
+            break;
+          case 2: // BOTTOM
+            lc.setRow(0, 0, 0b00011000);
+            break;
+          case 3: // LEFT
+            lc.setColumn(0, 7, 0b00011000);
+            break;
+        }
+      }
+    }
+
+    if (have[0] && have[1] && have[2] && have[3]) {
+      lc.clearDisplay(0);
+      break;
+    }
+
+  }
+
+}
+
+
 void setup_maze(byte module_number) {
   // for simplicity only one module MAZE can be connected
 
@@ -142,7 +187,7 @@ void update_maze(byte module_number) {
 
   if (module_status[module_number] == MODULE_TESTING) {
     test_maze_output(module_number);
-    test_simon_input(module_number);
+    test_maze_input(module_number);
 
     // at the end of test module disarm itself
     module_status[module_number] = 1 << MAZE_DISARM_LED;
