@@ -332,8 +332,6 @@ void update_maze(byte module_number) {
   boolean blinked = (millis() % MAZE_BLINK_DELAY) > (MAZE_BLINK_DELAY / 2);
 
   // simple output
-  lc.clearDisplay(0);
-
 
   byte p = getMazeFinishPosition(module_number);
   lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
@@ -342,6 +340,8 @@ void update_maze(byte module_number) {
   // start is blinking
   if (blinked) {
     lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
+  } else {
+    lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, false);
   }
 
 
@@ -383,6 +383,11 @@ void update_maze(byte module_number) {
         if (newpos != p) {
           setMazeStartPosition(module_number, newpos);
           module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
+          // turn off LED on previous position
+          lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, false);
+          p = newpos;
+          // turn on LED on new position
+          lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
         } else {
           module_status[module_number] = MODULE_FAILED_TO_DISARM;
           addStrike();
