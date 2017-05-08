@@ -334,14 +334,16 @@ void update_maze(byte module_number) {
   // simple output
   lc.clearDisplay(0);
 
-  // start is blinking
-  if (blinked) {
-    byte p = getMazeStartPosition(module_number);
-    lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
-  }
 
   byte p = getMazeFinishPosition(module_number);
   lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
+
+  p = getMazeStartPosition(module_number);
+  // start is blinking
+  if (blinked) {
+    lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
+  }
+
 
   /*
      MAZE INPUT
