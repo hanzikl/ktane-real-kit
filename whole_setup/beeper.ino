@@ -24,6 +24,17 @@ void setup_beeper() {
 }
 
 
+void beep_here() {
+
+
+#ifdef DEBUGING_BEEPER
+  Serial.println(F("BEEP"));
+#endif
+  digitalWrite(BEEPER_PIN, HIGH);
+  delay(BEEPER_BEEP_LENGTH);
+  digitalWrite(BEEPER_PIN, LOW);
+}
+
 void update_beeper(long currentMillis) {
 
   int blinkMillis = currentMillis % 1000;
