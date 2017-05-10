@@ -335,6 +335,11 @@ void update_maze(byte module_number) {
 
   boolean blinked = (millis() % MAZE_BLINK_DELAY) > (MAZE_BLINK_DELAY / 2);
 
+  if (!clockTicking) {
+    // do not update input and output
+    return;
+  }
+
   // simple output
 
   byte p = getMazeFinishPosition(module_number);
