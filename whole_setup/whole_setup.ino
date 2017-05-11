@@ -38,6 +38,7 @@ byte max_strikes = 2;
 #define MODULE_TYPE_TEST_OUTPUT 8
 #define MODULE_TYPE_TEST_INPUT 9
 
+const char debug_print_char = '#';
 
 // pocet bajtu na modul podle typu:
 const byte modulesSRinputWidth[] = {0, 0, 1, 1, 1, 1, 1, 1, 0, 1};
@@ -112,10 +113,11 @@ void setup()
   // init random seed
   randomSeed(analogRead(A0));
 
-#ifdef DEBUGING
   Serial.begin(9600);
 
-  Serial.print(F("\nKeep Talking and Nobody Explodes REALISTIC KIT\n"));
+#ifdef DEBUGING
+  Serial.print(debug_print_char);
+  Serial.println(F("Keep Talking and Nobody Explodes REALISTIC KIT"));
 #endif
 
   initModules();
@@ -160,6 +162,7 @@ void initModules() {
 
 
 #ifdef DEBUGING_INIT_MODULES
+  Serial.print(debug_print_char);
   Serial.print(F("Modules:"));
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     Serial.print(" #");
@@ -174,6 +177,8 @@ void initModules() {
   // spocte offsety Shift registru vstupu a vystupu
   for (int i = 1; i < MODULE_MAX_COUNT + 2; i++) {
 #ifdef DEBUGING_INIT_MODULES
+    Serial.print(debug_print_char);
+    Serial.print(F("OfC "));
     Serial.print(i);
     Serial.print(" w:");
     Serial.print(modulesSRoutputWidth[module_types[i - 1]]);
@@ -194,12 +199,13 @@ void initModules() {
   }
 
 #ifdef DEBUGING_INIT_MODULES
+  Serial.print(debug_print_char);
   Serial.print(F("InpOffs: "));
   for (int i = 0; i < MODULE_MAX_COUNT + 2; i++) {
     Serial.print(SRoffsetsInput[i]);
     Serial.print(" ");
   }
-  Serial.print(F("\nOutOffs: "));
+  Serial.print(F("\n#OutOffs: "));
   for (int i = 0; i < MODULE_MAX_COUNT + 2; i++) {
     Serial.print(SRoffsetsOutput[i]);
     Serial.print(" ");
@@ -210,6 +216,7 @@ void initModules() {
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     call_module_setup(i);
 #ifdef DEBUGING_INIT_MODULES
+    Serial.print(debug_print_char);
     Serial.print(F("InitOk:"));
     Serial.println(i);
 #endif
@@ -221,6 +228,7 @@ void initModules() {
 void addStrike() {
 
 #ifdef DEBUGING
+  Serial.print(debug_print_char);
   Serial.println(F("STRIKE!"));
 #endif
 
@@ -229,6 +237,7 @@ void addStrike() {
     boomTime = remainingTime;
     remainingTime = 0;
 #ifdef DEBUGING
+    Serial.print(debug_print_char);
     Serial.println(F("IT IS OVER NOW!"));
 #endif
     return;
@@ -237,6 +246,7 @@ void addStrike() {
   clockSpeedFactor *= clockSpeedUp;
 
 #ifdef DEBUGING
+  Serial.print(debug_print_char);
   Serial.print(F("Current clock speed factor is "));
   Serial.println(clockSpeedFactor);
 #endif
@@ -261,6 +271,7 @@ void settleModules() {
   clockTicking = false;
 
 #ifdef DEBUGING
+  Serial.print(debug_print_char);
   Serial.println(F("ALL MODULES DISARMED"));
 #endif
 

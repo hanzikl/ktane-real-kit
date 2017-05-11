@@ -43,16 +43,18 @@ void write_to_output_shift_register() {
   byte output_width = SRoffsetsOutput[MODULE_MAX_COUNT + 1];
 
 #ifdef DEBUGING_SR_OUT
+  Serial.print(debug_print_char);
   Serial.print(F("SR_OUT:"));
   Serial.println(output_width);
 #endif
 
   digitalWrite(SHIFT_REGISTER_OUTPUT_LATCH_PIN, LOW);
 
-  for (int i = output_width - 1; i >=0; i--) {
+  for (int i = output_width - 1; i >= 0; i--) {
     // sending backwards
 
 #ifdef DEBUGING_SR_OUT
+    Serial.print(debug_print_char);
     Serial.print(i);
     Serial.print(" d:");
     Serial.println(shift_register_output[i]);
@@ -71,6 +73,7 @@ void read_from_input_shift_register() {
   byte reading = 0;
 
 #ifdef DEBUGING_SR_IN
+  Serial.print(debug_print_char);
   Serial.print(F("SR_IN:"));
   Serial.println(input_width);
 #endif
@@ -96,6 +99,7 @@ void read_from_input_shift_register() {
 
     shift_register_input[j] = reading;
 #ifdef DEBUGING_SR_IN
+    Serial.print(debug_print_char);
     Serial.print(j);
     Serial.print(" r:");
     Serial.println(reading);
@@ -133,6 +137,7 @@ void update_shift_registers() {
 void print_input_shift_register() {
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
+    Serial.print(debug_print_char);
     Serial.print(i);
     Serial.print(" r:");
     Serial.println(shift_register_input[i]);
@@ -145,6 +150,7 @@ byte get_module_input(byte module_number, byte module_mask, boolean invert) {
   int pos = SRoffsetsInput[module_number + 1];
 
 #ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print(debug_print_char);
   Serial.print("pos:");
   Serial.println(pos);
 #endif
@@ -152,6 +158,7 @@ byte get_module_input(byte module_number, byte module_mask, boolean invert) {
   byte reading = shift_register_input[pos];
 
 #ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print(debug_print_char);
   Serial.print("r:");
   Serial.println(reading);
 #endif
@@ -160,6 +167,7 @@ byte get_module_input(byte module_number, byte module_mask, boolean invert) {
 
     reading = ~reading;
 #ifdef DEBUGING_SR_IN_GETVALUE
+    Serial.print(debug_print_char);
     Serial.print("inv:");
     Serial.println(reading);
 #endif
@@ -169,6 +177,7 @@ byte get_module_input(byte module_number, byte module_mask, boolean invert) {
   reading = reading & module_mask;
 
 #ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print(debug_print_char);
   Serial.print("msk:");
   Serial.println(reading);
 #endif
@@ -180,6 +189,7 @@ byte get_module_previous_input(byte module_number, byte module_mask, boolean inv
   int pos = SRoffsetsInput[module_number + 1];
 
 #ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print(debug_print_char);
   Serial.print("ppos:");
   Serial.println(pos);
 #endif
@@ -187,6 +197,7 @@ byte get_module_previous_input(byte module_number, byte module_mask, boolean inv
   byte reading = shift_register_previous_input[pos];
 
 #ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print(debug_print_char);
   Serial.print("pr:");
   Serial.println(reading);
 #endif
@@ -195,6 +206,7 @@ byte get_module_previous_input(byte module_number, byte module_mask, boolean inv
 
     reading = ~reading;
 #ifdef DEBUGING_SR_IN_GETVALUE
+    Serial.print(debug_print_char);
     Serial.print("pinv:");
     Serial.println(reading);
 #endif
@@ -204,6 +216,7 @@ byte get_module_previous_input(byte module_number, byte module_mask, boolean inv
   reading = reading & module_mask;
 
 #ifdef DEBUGING_SR_IN_GETVALUE
+  Serial.print(debug_print_char);
   Serial.print("pmsk:");
   Serial.println(reading);
 #endif

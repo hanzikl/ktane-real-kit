@@ -28,6 +28,7 @@ void beep_here() {
 
 
 #ifdef DEBUGING_BEEPER
+  Serial.print(debug_print_char);
   Serial.println(F("BEEP"));
 #endif
   digitalWrite(BEEPER_PIN, HIGH);
@@ -59,6 +60,7 @@ void update_beeper(long currentMillis) {
   if (beeper_on) {
     digitalWrite(BEEPER_PIN, HIGH);
 #ifdef DEBUGING_BEEPER
+    Serial.print(debug_print_char);
     Serial.println(F("BEEP"));
 #endif
   } else {

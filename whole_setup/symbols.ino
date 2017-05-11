@@ -175,6 +175,7 @@ void update_symbols(byte module_number) {
       // reset waiting for sequence show output
 
 #ifdef DEBUGING_SYMBOLS
+      Serial.print(debug_print_char);
       Serial.println(F("RE-ARMING SYMBOLS"));
 #endif
     }
@@ -189,6 +190,7 @@ void update_symbols(byte module_number) {
     */
 
 #ifdef DEBUGING_SYMBOLS_OUTPUT
+    Serial.print(debug_print_char);
     Serial.print("M");
     Serial.print(module_number);
     Serial.print(" S");
@@ -215,6 +217,7 @@ void update_symbols(byte module_number) {
         {
           byte base = getSymbolsSequenceByte(module_number, module_stage[module_number]);
 #ifdef DEBUGING_SYMBOLS
+          Serial.print(debug_print_char);
           Serial.print("M");
           Serial.print(module_number);
           Serial.print(" S");

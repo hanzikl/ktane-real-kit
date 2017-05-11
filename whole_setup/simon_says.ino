@@ -169,7 +169,7 @@ void test_simon_time(byte module_number) {
   setSimonNextChangeTime(module_number, tt);
 
   unsigned long ss = getSimonNextChangeTime(module_number);
-
+  Serial.print(debug_print_char);
   Serial.print(F("TT:"));
   if (ss == tt) {
     Serial.print(F("OK"));
@@ -256,6 +256,7 @@ void update_simon(byte module_number) {
     if (millis() > next_time) {
       byte progress = getSimonProgressOut(module_number);
 #ifdef DEBUGING_SIMON_OUTPUT
+      Serial.print(debug_print_char);
       Serial.print("M");
       Serial.print(module_number);
       Serial.print(" S");
@@ -274,6 +275,7 @@ void update_simon(byte module_number) {
         byte base = getSimonSequenceByte(module_number, progress / 2);
         shift_register_output[pos] = simon_output_connection[base];
 #ifdef DEBUGING_SIMON_OUTPUT
+        Serial.print(debug_print_char);
         Serial.print(" B");
         Serial.println(base);
 #endif
@@ -308,6 +310,7 @@ void update_simon(byte module_number) {
           byte progress = getSimonProgressIn(module_number);
           byte base = getSimonSequenceByte(module_number, progress);
 #ifdef DEBUGING_SIMON
+          Serial.print(debug_print_char);
           Serial.print("M");
           Serial.print(module_number);
           Serial.print(" S");

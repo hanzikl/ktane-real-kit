@@ -86,7 +86,15 @@ void setMazeWallAt(byte module_number, byte pos, byte value) {
 
 void maze_randomize_position(byte module_number) {
 
+  byte start_pos = random(6 * 6);
+  byte finish_pos = random(6 * 6);
 
+  while (finish_pos == start_pos) {
+    start_pos = random(6 * 6);
+  }
+
+  setMazeFinishPosition(module_number, start_pos);
+  setMazeStartPosition(module_number, finish_pos);
 
 }
 
@@ -101,15 +109,7 @@ void maze_generate(byte module_number) {
     // setMazeWallAt(module_number, p, 0);
   }
 
-  byte start_pos = random(6 * 6);
-  byte finish_pos = random(6 * 6);
-
-  while (finish_pos == start_pos) {
-    start_pos = random(6 * 6);
-  }
-
-  setMazeFinishPosition(module_number, start_pos);
-  setMazeStartPosition(module_number, finish_pos);
+  maze_randomize_position(module_number);
 
 }
 
@@ -117,6 +117,7 @@ void print_maze(byte module_number) {
 
   byte wall = 0;
   for (byte y = 0; y < 6; y++) {
+    Serial.print(debug_print_char);
     // TOP
     for (byte x = 0; x < 6; x++) {
       byte p = y * 6 + x;
@@ -128,6 +129,7 @@ void print_maze(byte module_number) {
       }
     }
     Serial.println();
+    Serial.print(debug_print_char);
     // SIDES AND CENTER
     for (byte x = 0; x < 6; x++) {
       byte p = y * 6 + x;
@@ -138,7 +140,7 @@ void print_maze(byte module_number) {
         Serial.print(F(" "));
       }
 
-      // TODO: center
+      // center
       if (p == getMazeStartPosition(module_number)) {
         Serial.print(F("S"));
       } else if (p == getMazeFinishPosition(module_number)) {
@@ -153,7 +155,8 @@ void print_maze(byte module_number) {
         Serial.print(F(" "));
       }
     }
-    Serial.println();
+    Serial.println("");
+    Serial.print(debug_print_char);
     // BOTTOM
     for (byte x = 0; x < 6; x++) {
       byte p = y * 6 + x;
@@ -164,7 +167,7 @@ void print_maze(byte module_number) {
         Serial.print(F("- -"));
       }
     }
-    Serial.println();
+    Serial.println("");
   }
 
 }
@@ -173,6 +176,7 @@ void print_maze(byte module_number) {
 void test_maze_output(byte module_number) {
 
 #ifdef DEBUGING_MAZE
+  Serial.print(debug_print_char);
   Serial.println(F("T:M"));
 #endif
 
@@ -259,6 +263,7 @@ byte move_via_button(byte module_number, byte button) {
   if (button & wall) {
     // runned into a wall
 #ifdef DEBUGING_MAZE
+    Serial.print(debug_print_char);
     Serial.println(F("WALL!"));
 #endif
     return newpos;
@@ -327,6 +332,7 @@ void update_maze(byte module_number) {
       module_status[module_number] = MODULE_ARMED;
       shift_register_output[pos] = 0;
 #ifdef DEBUGING_MAZE
+      Serial.print(debug_print_char);
       Serial.println(F("RE-ARMING MAZE"));
 #endif
     }
@@ -375,6 +381,7 @@ void update_maze(byte module_number) {
         }
 
 #ifdef DEBUGING_MAZE
+        Serial.print(debug_print_char);
         Serial.print("M");
         Serial.print(module_number);
         Serial.print(" P");

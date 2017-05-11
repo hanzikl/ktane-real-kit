@@ -132,6 +132,8 @@ void show_time(long remainingTime, byte module_number) {
 
 #ifdef DEBUGING_DISPLAY
   if (display_previous_second != seconds) {
+    Serial.print(debug_print_char);
+    Serial.print("T");
     Serial.print(minutes);
     Serial.print(":");
     Serial.println(seconds);
@@ -163,6 +165,7 @@ void update_display(byte module_number, boolean output_only) {
 
   if (module_status[module_number] == MODULE_TESTING) {
 #ifdef DEBUGING_DISPLAY
+    Serial.print(debug_print_char);
     Serial.println(F("Testing display"));
 #endif
 
