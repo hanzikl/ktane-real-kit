@@ -290,6 +290,10 @@ void loop() {
     previousDisplayMillis = currentMillis;
 
     if (currentMillis - previousMillis >= interval) {
+      
+      // communicate
+      handle_input_serial();
+      
       // update modules completely
 
       if (clockTicking) {
