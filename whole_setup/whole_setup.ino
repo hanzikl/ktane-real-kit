@@ -4,6 +4,8 @@
    GENERAL SETUP
 */
 
+const char vers[] = "0.0.1";
+
 long boomTime = 0;
 long remainingTime = 1 * 75 * 1000l; // in millis
 unsigned long previousMillis = 0; // time helper
@@ -11,7 +13,7 @@ unsigned long previousDisplayMillis = 0; // time helper
 const long interval = 7; // how often should system react in millis
 const long display_interval = 4; // how often should the output be refreshed
 
-boolean clockTicking = true;
+boolean clockTicking = false;
 double clockSpeedFactor = 1;
 double clockSpeedUp = 1.2;
 
@@ -79,8 +81,6 @@ byte segment_digit = 0;
    MODULES STATUS
 */
 
-byte bio_status = MODULE_ARMED;
-
 byte module_types[MODULE_MAX_COUNT + 1];
 byte module_status[MODULE_MAX_COUNT + 1];
 byte module_stage[MODULE_MAX_COUNT + 1];
@@ -138,7 +138,6 @@ void initModules() {
       module_data[i][j] = 0;
     }
   }
-
 
   // pozice 0 - modul Simon
   //  module_types[0] = MODULE_TYPE_SIMON;
@@ -279,6 +278,11 @@ void settleModules() {
 
 void loop() {
 
+  // communicate
+  if (!clockTicking) {
+    handle_serial_input();
+  }
+
   if (modules_testing) {
     administerTests();
   }
@@ -290,10 +294,7 @@ void loop() {
     previousDisplayMillis = currentMillis;
 
     if (currentMillis - previousMillis >= interval) {
-      
-      // communicate
-      handle_input_serial();
-      
+
       // update modules completely
 
       if (clockTicking) {
