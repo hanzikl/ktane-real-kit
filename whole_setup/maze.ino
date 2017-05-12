@@ -313,6 +313,7 @@ void update_maze(byte module_number) {
     shift_register_output[pos] = 1 << MAZE_DISARM_LED;
     return;
   }
+  shift_register_output[pos] = 0;
 
   if (module_status[module_number] == MODULE_TESTING) {
     test_maze_output(module_number);

@@ -311,6 +311,15 @@ void setRemainingTime(char* data) {
   sendSuccesMessage();
 }
 
+void setClockTicking(char* data) {
+  if (!parseBytesToWorkArray(data, 1)) {
+    sendErrorMessage();
+    return;
+  }
+  clockTicking = (remainingTime > 0) && (comlink_work_array[0] > 0);
+  sendSuccesMessage();
+}
+
 // here to process incoming serial data after a terminator received
 void process_data(char* data)
 {
@@ -378,6 +387,10 @@ void process_data(char* data)
 
     if (data[1] == 'R') {
       setRemainingTime(data);
+    }
+
+    if (data[1] == 'T') {
+      setClockTicking(data);
     }
   }
 
