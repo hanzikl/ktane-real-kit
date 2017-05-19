@@ -1,3 +1,8 @@
+/*
+ * Input parsing methods are based on
+ * http://www.gammon.com.au/serial
+ */
+
 #ifdef DEBUGING
 #define DEBUGING_COMLINK
 // #define DEBUGING_COMLINK_PARS
