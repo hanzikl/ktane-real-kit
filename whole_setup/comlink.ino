@@ -406,6 +406,7 @@ void process_data(char* data)
 
   if (data[0] == 'T') {
     // TODO: run tests
+    initModulesTest();
 
   }
 

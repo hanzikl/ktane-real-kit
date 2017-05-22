@@ -26,8 +26,8 @@
 #define SYMBOLS_DATA_ER 1
 #define SYMBOLS_DATA_SQ 2
 
-const byte symbols_input_connection[] = {16, 32, 64, 128};
-const byte symbols_output_connection[] = {32, 4, 16, 8, 2};
+const byte symbols_input_connection[] = {16, 32, 64, 128}; // U,R,D,L
+const byte symbols_output_connection[] = {32, 8, 16, 64, 128};
 
 byte symbols_stage = 0;
 

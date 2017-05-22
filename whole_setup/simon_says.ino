@@ -29,8 +29,8 @@
 
 byte simon_rules[SIMON_BUTTON_COUNT] = {1, 2, 3, 0};
 
-const byte simon_input_connection[] = {16, 32, 64, 128};
-const byte simon_output_connection[] = {32, 4, 16, 8, 2};
+const byte simon_input_connection[] = {16, 32, 64, 128}; // U,R,D,L
+const byte simon_output_connection[] = {32, 8, 16, 64, 128}; // U,R,D,L,I
 
 byte simon_stage = 0;
 
@@ -96,11 +96,9 @@ void setSimonSequenceByte(byte module_number, byte byte_number, byte value) {
 void test_simon_output(byte module_number) {
 
   int delayTime = 600;
+  byte pos = SRoffsetsOutput[module_number];
 
   for (int j = 0; j < 2; j++) {
-
-    byte pos = SRoffsetsOutput[module_number];
-
     for (int i = 0; i < 4; i++) {
       shift_register_output[pos] = simon_output_connection[i];
       write_to_output_shift_register();

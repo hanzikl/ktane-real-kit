@@ -143,9 +143,18 @@ void initModules() {
   //  module_types[0] = MODULE_TYPE_SIMON;
   //  module_status[0] = MODULE_ARMED;
 
-  // pozice 0 - modul Maze
-  module_types[0] = MODULE_TYPE_MAZE;
+
+  // pozice 1 - modul Display
+  module_types[1] = MODULE_TYPE_DISPLAY;
+  module_status[1] = MODULE_DISARMED;
+
+  // pozice 0 - modul Symbols
+  module_types[0] = MODULE_TYPE_SYMBOLS;
   module_status[0] = MODULE_ARMED;
+
+  // pozice 2 - modul Simon
+//  module_types[2] = MODULE_TYPE_SYMBOLS;
+//  module_status[2] = MODULE_ARMED;
 
   // pozice 0 - modul Symbols
   //  module_types[0] = MODULE_TYPE_SYMBOLS;
@@ -156,8 +165,8 @@ void initModules() {
   // module_status[0] = MODULE_ARMED;
 
   // pozice 1 - modul Display
-  module_types[1] = MODULE_TYPE_DISPLAY;
-  module_status[1] = MODULE_DISARMED;
+//  module_types[1] = MODULE_TYPE_DISPLAY;
+//  module_status[1] = MODULE_DISARMED;
 
 
 #ifdef DEBUGING_INIT_MODULES
