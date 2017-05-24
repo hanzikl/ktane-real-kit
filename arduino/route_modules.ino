@@ -14,8 +14,8 @@ void call_module_setup(byte module_number) {
     case MODULE_TYPE_SIMON:
       setup_simon(module_number);
       break;
-    case MODULE_TYPE_SYMBOLS:
-      setup_symbols(module_number);
+    case MODULE_TYPE_KEYPAD:
+      setup_keypad(module_number);
       break;
     case MODULE_TYPE_TEST_OUTPUT:
       setup_testmodule_output(module_number);
@@ -49,8 +49,8 @@ void call_module_update(byte module_number, boolean output_only) {
       case MODULE_TYPE_SIMON:
         update_simon(module_number);
         break;
-      case MODULE_TYPE_SYMBOLS:
-        update_symbols(module_number);
+      case MODULE_TYPE_KEYPAD:
+        update_keypad(module_number);
         break;
       case MODULE_TYPE_MAZE:
         update_maze(module_number);
