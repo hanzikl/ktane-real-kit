@@ -24,6 +24,9 @@ void setup_beeper() {
 }
 
 
+/*
+ * Beeps. Beware - uses delay - use only for testing.
+ */
 void beep_here() {
 
 

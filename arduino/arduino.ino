@@ -1,5 +1,3 @@
-#include <avr/pgmspace.h>
-
 /*
    GENERAL SETUP
 */
@@ -13,7 +11,7 @@ unsigned long previousDisplayMillis = 0; // time helper
 const long interval = 7; // how often should system react in millis
 const long display_interval = 4; // how often should the output be refreshed
 
-boolean clockTicking = false;
+boolean clockTicking = true;
 double clockSpeedFactor = 1;
 double clockSpeedUp = 1.2;
 
@@ -22,13 +20,14 @@ boolean modules_testing = false;
 byte strikes = 0;
 byte max_strikes = 2;
 
+// module status definitions
 #define MODULE_TESTING 0
 #define MODULE_DISARMED 1
 #define MODULE_ARMED 2
 #define MODULE_FAILED_TO_DISARM 3
 #define MODULE_DISARMING_IN_PROGRESS 4
 
-
+// module type definitions
 #define MODULE_TYPE_MISSING 0
 #define MODULE_TYPE_DISPLAY 1
 #define MODULE_TYPE_SIMON 2
@@ -42,7 +41,7 @@ byte max_strikes = 2;
 
 const char debug_print_char = '#';
 
-// pocet bajtu na modul podle typu:
+// count of input and output bytes per module
 const byte modulesSRinputWidth[] = {0, 0, 1, 1, 1, 1, 1, 1, 0, 1};
 const byte modulesSRoutputWidth[] = {0, 3, 1, 1, 1, 1, 6, 1, 2, 0};
 
@@ -98,7 +97,6 @@ byte shift_register_output[(MODULE_MAX_COUNT * MODULE_MAX_OUTPUT_SIZE) + 1];
    MODULES PROPERTIES
 */
 
-
 // offsets are computed for all modules plus one virtual module at the end
 byte SRoffsetsInput[MODULE_MAX_COUNT + 2];
 byte SRoffsetsOutput[MODULE_MAX_COUNT + 2];
@@ -139,35 +137,13 @@ void initModules() {
     }
   }
 
-  // pozice 0 - modul Simon
-  //  module_types[0] = MODULE_TYPE_SIMON;
-  //  module_status[0] = MODULE_ARMED;
-
-
-  // pozice 1 - modul Display
-  module_types[1] = MODULE_TYPE_DISPLAY;
-  module_status[1] = MODULE_DISARMED;
-
-  // pozice 0 - modul Symbols
-  module_types[0] = MODULE_TYPE_SYMBOLS;
+  // position 0 - module Simon
+  module_types[0] = MODULE_TYPE_SIMON;
   module_status[0] = MODULE_ARMED;
 
-  // pozice 2 - modul Simon
-//  module_types[2] = MODULE_TYPE_SYMBOLS;
-//  module_status[2] = MODULE_ARMED;
-
-  // pozice 0 - modul Symbols
-  //  module_types[0] = MODULE_TYPE_SYMBOLS;
-  //  module_status[0] = MODULE_ARMED;
-
-  // pozice 0 - modul test output
-  // module_types[0] = MODULE_TYPE_TEST_OUTPUT;
-  // module_status[0] = MODULE_ARMED;
-
-  // pozice 1 - modul Display
-//  module_types[1] = MODULE_TYPE_DISPLAY;
-//  module_status[1] = MODULE_DISARMED;
-
+  // position 1 - module Display
+  module_types[1] = MODULE_TYPE_DISPLAY;
+  module_status[1] = MODULE_DISARMED;
 
 #ifdef DEBUGING_INIT_MODULES
   Serial.print(debug_print_char);
@@ -182,7 +158,7 @@ void initModules() {
   delay(500);
 #endif
 
-  // spocte offsety Shift registru vstupu a vystupu
+  // computes shift registers input and output offsets for each module
   for (int i = 1; i < MODULE_MAX_COUNT + 2; i++) {
 #ifdef DEBUGING_INIT_MODULES
     Serial.print(debug_print_char);
@@ -192,15 +168,14 @@ void initModules() {
     Serial.print(modulesSRoutputWidth[module_types[i - 1]]);
     Serial.println();
 #endif
-    // TODO: vypocet offsetu jeste neni uplne promysleny !!!
+    // TODO: offset computation is not tested on more than one module with inputs
     SRoffsetsInput[MODULE_MAX_COUNT + 1 - i] =
       SRoffsetsInput[MODULE_MAX_COUNT + 2 - i] + modulesSRinputWidth[module_types[i - 1]];
     SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i - 1]];
   }
 
-  // snizi o jedna offsety vstupnich registru
+  // offsets of output shift registers must be one lower // TODO: better translation of this ;-)
   for (int i = 1; i < MODULE_MAX_COUNT + 2; i++) {
-
     if (SRoffsetsInput[i] > 0) {
       SRoffsetsInput[i]--;
     }
@@ -213,7 +188,9 @@ void initModules() {
     Serial.print(SRoffsetsInput[i]);
     Serial.print(" ");
   }
-  Serial.print(F("\n#OutOffs: "));
+  Serial.println();
+  Serial.print(debug_print_char);
+  Serial.print(F("OutOffs: "));
   for (int i = 0; i < MODULE_MAX_COUNT + 2; i++) {
     Serial.print(SRoffsetsOutput[i]);
     Serial.print(" ");
@@ -228,7 +205,6 @@ void initModules() {
     Serial.print(F("InitOk:"));
     Serial.println(i);
 #endif
-
   }
 
 }
@@ -246,7 +222,7 @@ void addStrike() {
     remainingTime = 0;
 #ifdef DEBUGING
     Serial.print(debug_print_char);
-    Serial.println(F("IT IS OVER NOW!"));
+    Serial.println(F("GAME OVER!"));
 #endif
     return;
   }
@@ -262,13 +238,10 @@ void addStrike() {
 }
 
 
+/**
+ * Checks if all modules are disarmed. In that case stops clock.
+ */
 void settleModules() {
-
-  /*
-    if (bio_status != MODULE_DISARMED) {
-      return;
-    }
-  */
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     if (module_status[i] > MODULE_DISARMED) {
@@ -298,10 +271,12 @@ void loop() {
 
   unsigned long currentMillis = millis();
 
+  // updating of displays must be done very often
   if (currentMillis - previousDisplayMillis >= display_interval) {
 
     previousDisplayMillis = currentMillis;
 
+    // complete updates of input and output should be done in reasonable frequency
     if (currentMillis - previousMillis >= interval) {
 
       // update modules completely
@@ -315,7 +290,7 @@ void loop() {
       clockTicking = clockTicking && (remainingTime > 0);
 
       /*
-         Here comes the update of modules
+         Update modules and everything
       */
 
       update_beeper(remainingTime);

@@ -56,8 +56,7 @@ void test_display(byte module_number) {
       }
     }
   }
-  // test 4digits 7segment display
-  // TODO:
+  // TODO: 4digits 7segment display
 
 }
 
@@ -142,10 +141,10 @@ void show_time(long remainingTime, byte module_number) {
 #endif
 
   if (remainingTime >= 60 * 1000l) {
-    // cas je nad jednu minutu, ukazujeme minuty a sekundy
+    // show minutes and seconds
     showTimePart(minutes, seconds, heremillis, module_number);
   } else {
-    // ukazujeme sekundy a 2 cifry milisekund
+    // show seconds and two digits of milliseconds
     showTimePart(seconds, heremillis / 10, heremillis, module_number);
   }
 
@@ -160,7 +159,7 @@ void setup_display(byte module_number) {
 void update_display(byte module_number, boolean output_only) {
 
   if (output_only) {
-    ; // display is as the whole output only, need no special care here
+    ; // display is output only, need no special care here
   }
 
   if (module_status[module_number] == MODULE_TESTING) {
@@ -197,7 +196,4 @@ void update_display(byte module_number, boolean output_only) {
   }
 
 }
-
-
-
 

@@ -198,9 +198,6 @@ void simon_generate_sequence(byte module_number) {
 
 void setup_simon(byte module_number) {
 
-  // set neutral previous input
-  // shift_register_previous_input[module_number] = 255;
-
   simon_generate_sequence(module_number);
   module_stage[module_number] = SIMON_STAGE_STARTING;
   setSimonNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);

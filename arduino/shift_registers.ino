@@ -225,6 +225,7 @@ byte get_module_previous_input(byte module_number, byte module_mask, boolean inv
 
 }
 
+// input signal denoising - we allow input only if it is a same as in last update
 byte get_module_sanitized_input(byte module_number, byte module_mask, boolean invert) {
   byte reading = get_module_input(module_number, module_mask, invert);
   byte prev_reading = get_module_previous_input(module_number, module_mask, invert);

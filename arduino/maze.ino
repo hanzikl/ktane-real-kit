@@ -81,7 +81,7 @@ void setMazeWallAt(byte module_number, byte pos, byte value) {
 
 
 /*
-  RANDOM MAZE GENERATOR
+  RANDOM MAZE GENERATOR - for early experiments without maze from serial communication
 */
 
 void maze_randomize_position(byte module_number) {
@@ -113,6 +113,7 @@ void maze_generate(byte module_number) {
 
 }
 
+// debugging function
 void print_maze(byte module_number) {
 
   byte wall = 0;
@@ -292,6 +293,7 @@ byte move_via_button(byte module_number, byte button) {
 
 void setup_maze(byte module_number) {
   // for simplicity only one module MAZE can be connected
+  // TODO: allow more maze modules - should not be hard
 
   lc.shutdown(0, false);
   /* Set the brightness to a medium values */
@@ -353,7 +355,7 @@ void update_maze(byte module_number) {
   lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
 
   p = getMazeStartPosition(module_number);
-  // start is blinking
+  // start = actual position is blinking
   if (blinked) {
     lc.setLed(0, 1 + (36 - 1 - p) / 6, 1 + (36 - 1 - p) % 6, true);
   } else {

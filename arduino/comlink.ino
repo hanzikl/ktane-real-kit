@@ -270,6 +270,12 @@ void sendModuleData(char* data) {
   Serial.println();
 }
 
+
+/**
+ * Sets data of module in given chunk.
+ * Chunk is simply part of module data. It is used because sending all data in one line
+ * would not fit to the buffer used by input parser.
+ */
 void setModuleDataChunk(char* data) {
   if (!parseBytesToWorkArray(data, COMLINK_CHUNK_SIZE + 2)) {
     sendErrorMessage();

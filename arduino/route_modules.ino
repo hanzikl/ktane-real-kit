@@ -5,8 +5,8 @@
    setup_{module_name}(module_number)
    update_{module_name}(module_number)
 
-   in this file we call correct functions for given module according to it's type
-   Practically we are reimplementing inheritance from OOP.
+   In this file we call correct functions for given module according to it's type
+   Practically we are reimplementing inheritance from the OOP.
 */
 
 void call_module_setup(byte module_number) {
