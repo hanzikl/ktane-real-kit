@@ -69,8 +69,7 @@ void write_to_output_shift_register() {
 }
 
 void read_from_input_shift_register() {
-  byte input_width = SRoffsetsInput[0];
-  byte reading = 0;
+  byte input_width = SRoffsetsInput[MODULE_MAX_COUNT + 1];
 
 #ifdef DEBUGING_SR_IN
   Serial.print(debug_print_char);
@@ -85,6 +84,7 @@ void read_from_input_shift_register() {
   digitalWrite(SHIFT_REGISTER_INPUT_CL_EN_PIN, LOW);
 
   for (int j = 0; j < input_width; j++) {
+    byte reading = 0;
     for (int i = 0; i < 8; i++) {
 
       byte value = digitalRead(SHIFT_REGISTER_INPUT_DATA_PIN);
@@ -147,7 +147,7 @@ void print_input_shift_register() {
 
 byte get_module_input(byte module_number, byte module_mask, boolean invert) {
 
-  int pos = SRoffsetsInput[module_number + 1];
+  int pos = SRoffsetsInput[module_number];
 
 #ifdef DEBUGING_SR_IN_GETVALUE
   Serial.print(debug_print_char);

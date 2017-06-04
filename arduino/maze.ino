@@ -9,7 +9,7 @@
 */
 
 #define INPUT_MASK_MAZE 0b11110000 // must be in reversed order
-#define MAZE_DISARM_LED 1
+#define MAZE_DISARM_LED 7
 
 #define MAZE_OUTPUT_DATA_PIN 6
 #define MAZE_OUTPUT_LOAD_PIN 7
@@ -184,6 +184,7 @@ void test_maze_output(byte module_number) {
   int delayTime = 500;
 
   byte pos = SRoffsetsOutput[module_number];
+  shift_register_output[pos] = 1 << MAZE_DISARM_LED;
 
   // test LED matrix
 
@@ -218,6 +219,9 @@ void test_maze_input(byte module_number) {
   int delayTime = 50; // ms
 
   boolean have[5] = {false, false, false, false};
+
+  byte pos = SRoffsetsOutput[module_number];
+  shift_register_output[pos] = 0;
 
   while (true) {
 
@@ -323,7 +327,6 @@ void update_maze(byte module_number) {
 
     // at the end of test module disarm itself
     module_status[module_number] = MODULE_DISARMED;
-    module_status[module_number] = 1 << MAZE_DISARM_LED;
     return;
   }
 

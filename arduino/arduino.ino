@@ -42,7 +42,9 @@ byte max_strikes = 2;
 const char debug_print_char = '#';
 
 // count of input and output bytes per module
+//                                  Mi Di Si Bi Wi Ke Me Ma TO TI
 const byte modulesSRinputWidth[] = {0, 0, 1, 1, 1, 1, 1, 1, 0, 1};
+//                                   Mi Di Si Bi Wi Ke Me Ma TO TI
 const byte modulesSRoutputWidth[] = {0, 3, 1, 1, 1, 1, 6, 1, 2, 0};
 
 #define READING_ERROR 255
@@ -137,13 +139,14 @@ void initModules() {
     }
   }
 
-  // position 0 - module Simon
-  module_types[0] = MODULE_TYPE_SIMON;
-  module_status[0] = MODULE_ARMED;
+  module_types[0] = MODULE_TYPE_DISPLAY;
+  module_status[0] = MODULE_DISARMED;
 
-  // position 1 - module Display
-  module_types[1] = MODULE_TYPE_DISPLAY;
-  module_status[1] = MODULE_DISARMED;
+  module_types[1] = MODULE_TYPE_SIMON;
+  module_status[1] = MODULE_ARMED;
+
+  module_types[2] = MODULE_TYPE_MAZE;
+  module_status[2] = MODULE_ARMED;
 
 #ifdef DEBUGING_INIT_MODULES
   Serial.print(debug_print_char);
@@ -158,27 +161,35 @@ void initModules() {
   delay(500);
 #endif
 
-  // computes shift registers input and output offsets for each module
+
+  // compute shift registers output offset for each module
+  SRoffsetsOutput[0] = 0;
+
   for (int i = 1; i < MODULE_MAX_COUNT + 2; i++) {
 #ifdef DEBUGING_INIT_MODULES
     Serial.print(debug_print_char);
-    Serial.print(F("OfC "));
+    Serial.print(F("OfCOut "));
     Serial.print(i);
     Serial.print(" w:");
     Serial.print(modulesSRoutputWidth[module_types[i - 1]]);
     Serial.println();
 #endif
-    // TODO: offset computation is not tested on more than one module with inputs
-    SRoffsetsInput[MODULE_MAX_COUNT + 1 - i] =
-      SRoffsetsInput[MODULE_MAX_COUNT + 2 - i] + modulesSRinputWidth[module_types[i - 1]];
     SRoffsetsOutput[i] = SRoffsetsOutput[i - 1] + modulesSRoutputWidth[module_types[i - 1]];
   }
 
-  // offsets of output shift registers must be one lower // TODO: better translation of this ;-)
+  // compute shift registers input offset for each module
+  SRoffsetsInput[0] = 0;
+
   for (int i = 1; i < MODULE_MAX_COUNT + 2; i++) {
-    if (SRoffsetsInput[i] > 0) {
-      SRoffsetsInput[i]--;
-    }
+#ifdef DEBUGING_INIT_MODULES
+    Serial.print(debug_print_char);
+    Serial.print(F("OfCIn "));
+    Serial.print(i);
+    Serial.print(" w:");
+    Serial.print(modulesSRinputWidth[module_types[i - 1]]);
+    Serial.println();
+#endif
+    SRoffsetsInput[i] = SRoffsetsInput[i - 1] + modulesSRinputWidth[module_types[i - 1]];
   }
 
 #ifdef DEBUGING_INIT_MODULES
