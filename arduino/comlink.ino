@@ -155,8 +155,8 @@ boolean parseBytesToWorkArray(char* data, byte count) {
     if (i >= count) {
 #ifdef DEBUGING_COMLINK
       Serial.print(debug_print_char);
-      for (int i = 0; i < COMLINK_WORK_ARRAY_SIZE; i++) {
-        Serial.print(comlink_work_array[i]);
+      for (int j = 0; j < COMLINK_WORK_ARRAY_SIZE; j++) {
+        Serial.print(comlink_work_array[j]);
         Serial.print(" ");
       }
       Serial.println();
