@@ -331,7 +331,6 @@ void setClockTicking(char* data) {
   sendSuccesMessage();
 }
 
-// here to process incoming serial data after a terminator received
 void process_data(char* data)
 {
 #ifdef DEBUGING_COMLINK
@@ -339,8 +338,6 @@ void process_data(char* data)
   Serial.print(F("GOT DATA: "));
   Serial.println(data);
 #endif
-  // for now just display it
-  // (but you could compare it to some value, convert to an integer, etc.)
 
   if (data[0] == 'G') {
     // getters

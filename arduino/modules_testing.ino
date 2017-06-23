@@ -6,18 +6,18 @@ byte module_tested = 0;
 
 void initModulesTest() {
 
-  // zapneme testovani
+  // set testing on
   modules_testing = true;
 
-  // vypneme vsechny moduly
+  // turn off all modules
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     module_status[i] = MODULE_DISARMED;
   }
 
-  // nalezneme prvni testovatelny modul
+  // find first testable module
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     if (module_types[i] != MODULE_TYPE_MISSING) {
-      // a spustime na nem test
+      // start test of this module
       module_tested = i;
       testModule(module_tested);
       break;
@@ -58,7 +58,7 @@ void administerTests() {
     }
 
     if (module_status[module_tested] == MODULE_TESTING) {
-      // modul se stale testuje
+      // module is still testing
       return;
     }
 
