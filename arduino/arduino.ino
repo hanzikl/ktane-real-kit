@@ -5,7 +5,7 @@
 const char vers[] = "0.0.1";
 
 long boomTime = 0;
-long remainingTime = 1 * 75 * 1000l; // in millis
+long remainingTime = 0; // in millis
 unsigned long previousMillis = 0; // time helper
 unsigned long previousDisplayMillis = 0; // time helper
 const long interval = 7; // how often should system react in millis
@@ -120,16 +120,18 @@ void setup()
   Serial.println(F("Keep Talking and Nobody Explodes REALISTIC KIT"));
 #endif
 
+  presetModules();
+
   initModules();
 
   setup_beeper();
   setup_shift_registers();
 
   // initModulesTest();
-
 }
 
-void initModules() {
+void presetModules() {
+
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {
     module_types[i] = MODULE_TYPE_MISSING;
     module_status[i] = MODULE_DISARMED;
@@ -139,14 +141,9 @@ void initModules() {
     }
   }
 
-  module_types[0] = MODULE_TYPE_DISPLAY;
-  module_status[0] = MODULE_DISARMED;
+}
 
-  module_types[1] = MODULE_TYPE_SIMON;
-  module_status[1] = MODULE_ARMED;
-
-  module_types[2] = MODULE_TYPE_MAZE;
-  module_status[2] = MODULE_ARMED;
+void initModules() {
 
 #ifdef DEBUGING_INIT_MODULES
   Serial.print(debug_print_char);
@@ -250,8 +247,8 @@ void addStrike() {
 
 
 /**
- * Checks if all modules are disarmed. In that case stops clock.
- */
+   Checks if all modules are disarmed. In that case stop a clock.
+*/
 void settleModules() {
 
   for (int i = 0; i < MODULE_MAX_COUNT; i++) {

@@ -1,7 +1,7 @@
 /*
- * Input parsing methods are based on
- * http://www.gammon.com.au/serial
- */
+   Input parsing methods are based on
+   http://www.gammon.com.au/serial
+*/
 
 #ifdef DEBUGING
 #define DEBUGING_COMLINK
@@ -272,10 +272,10 @@ void sendModuleData(char* data) {
 
 
 /**
- * Sets data of module in given chunk.
- * Chunk is simply part of module data. It is used because sending all data in one line
- * would not fit to the buffer used by input parser.
- */
+   Sets data of module in given chunk.
+   Chunk is simply part of module data. It is used because sending all data in one line
+   would not fit to the buffer used by input parser.
+*/
 void setModuleDataChunk(char* data) {
   if (!parseBytesToWorkArray(data, COMLINK_CHUNK_SIZE + 2)) {
     sendErrorMessage();
@@ -403,8 +403,7 @@ void process_data(char* data)
   }
 
   if (data[0] == 'I') {
-    // TODO: run initializations
-
+    initModules();
   }
 
   if (data[0] == 'T') {
