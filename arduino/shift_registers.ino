@@ -186,7 +186,7 @@ byte get_module_input(byte module_number, byte module_mask, boolean invert) {
 }
 
 byte get_module_previous_input(byte module_number, byte module_mask, boolean invert) {
-  int pos = SRoffsetsInput[module_number + 1];
+  int pos = SRoffsetsInput[module_number];
 
 #ifdef DEBUGING_SR_IN_GETVALUE
   Serial.print(debug_print_char);
@@ -229,6 +229,12 @@ byte get_module_previous_input(byte module_number, byte module_mask, boolean inv
 byte get_module_sanitized_input(byte module_number, byte module_mask, boolean invert) {
   byte reading = get_module_input(module_number, module_mask, invert);
   byte prev_reading = get_module_previous_input(module_number, module_mask, invert);
+#ifdef DEBUGING_SR_IN
+  Serial.print(debug_print_char);
+  Serial.print(prev_reading);
+  Serial.print(" ~ ");
+  Serial.println(reading);
+#endif
   if (reading == prev_reading) {
     return reading;
   } else {
