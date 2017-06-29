@@ -26,6 +26,9 @@ void call_module_setup(byte module_number) {
     case MODULE_TYPE_MAZE:
       setup_maze(module_number);
       break;
+    case MODULE_TYPE_WIRES:
+      setup_wires(module_number);
+      break;
     default:
       ;
   }
@@ -54,6 +57,9 @@ void call_module_update(byte module_number, boolean output_only) {
         break;
       case MODULE_TYPE_MAZE:
         update_maze(module_number);
+        break;
+      case MODULE_TYPE_WIRES:
+        update_wires(module_number);
         break;
       case MODULE_TYPE_TEST_OUTPUT:
         update_testmodule_output(module_number);
