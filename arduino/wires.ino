@@ -15,17 +15,30 @@
 
 // setup data locations
 #define WIRES_DATA_CURRENT_MASK 0
-#define WIRES_DATA_CORRECT_MASK 1
+#define WIRES_DATA_TARGET_MASK 1
 
-const byte wires_input_connection[] = {4, 8, 16, 32, 64, 128};
+// input is connected directly (1, 2, 4, 8, 16, 32), not using wires_input_connection transformation
 const byte wires_output_connection[] = {128};
-
 
 /*
    Getting and setting data
 */
 
-// TODO:
+byte getWiresCurrentMask(byte module_number) {
+  return module_data[module_number][WIRES_DATA_CURRENT_MASK];
+}
+
+byte getWiresTargetMask(byte module_number) {
+  return module_data[module_number][WIRES_DATA_TARGET_MASK];
+}
+
+void setWiresCurrentMask(byte module_number, byte value) {
+  module_data[module_number][WIRES_DATA_CURRENT_MASK] = value;
+}
+
+void setWiresTargetMask(byte module_number, byte value) {
+  module_data[module_number][WIRES_DATA_TARGET_MASK] = value;
+}
 
 /**
   TESTS
@@ -61,9 +74,8 @@ void test_wires_input(byte module_number) {
 
 
 void setup_wires(byte module_number) {
-
-  module_stage[module_number] = 0;
-
+  // no setup needed
+  // all data should be set through serial comlink
 }
 
 void update_wires(byte module_number) {
@@ -86,29 +98,48 @@ void update_wires(byte module_number) {
 
   byte reading = get_module_sanitized_input(module_number, INPUT_MASK_WIRES, true);
 
-  if (module_status[module_number] == MODULE_FAILED_TO_DISARM
-      || module_status[module_number] == MODULE_DISARMING_IN_PROGRESS)  {
-    if (reading == 0) {
-      module_status[module_number] = MODULE_ARMED;
-      shift_register_output[pos] = 0;
-      // reset waiting for sequence show output
+  if (clockTicking) {
+    byte current_mask = getWiresCurrentMask(module_number);
+    byte target_mask = getWiresTargetMask(module_number);
+
+    byte masked_reading = reading & current_mask;
+
+    // check if target wire was cut somehow with error (more wires at a time maybe?) in previous change
+    if ((target_mask & current_mask) == 0) {
+      // target wire was cut
+      module_status[module_number] = MODULE_DISARMED;
+    }
+
+    if (masked_reading != current_mask) {
 
 #ifdef DEBUGING_WIRES
       Serial.print(debug_print_char);
-      Serial.println(F("RE-ARMING WIRES"));
+      Serial.print("M");
+      Serial.print(module_number);
+      Serial.print(" R");
+      Serial.print(reading);
+      Serial.print(" CM");
+      Serial.print(current_mask);
+      Serial.print(" L");
+      Serial.print(masked_reading);
+      Serial.print(" T");
+      Serial.print(target_mask);
+      Serial.println();
 #endif
-    }
-    return;
-  }
 
-  if (clockTicking) {
-    // TODO:
+      // input changed on relevant positions
+      if (current_mask - masked_reading == target_mask) {
+        // target wire was cut in this change
+        module_status[module_number] = MODULE_DISARMED;
+      } else {
+        // wrong wire was cut
+        setWiresCurrentMask(module_number, masked_reading);
+        addStrike();
+      }
+
+    }
+
   }
 
 }
-
-
-
-
-
 
