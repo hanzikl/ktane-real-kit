@@ -8,6 +8,7 @@
   SETUP FOR SIMON SAYS
 */
 
+// TODO: independent stage count
 #define SIMON_STAGE_COUNT 4
 #define SIMON_STAGE_STARTING 1
 #define SIMON_BUTTON_COUNT 4
@@ -21,11 +22,22 @@
 #define SIMON_DISARM_LED 4
 
 // setup data locations
-#define SIMON_DATA_PO 0
-#define SIMON_DATA_PI 1
-#define SIMON_DATA_SL 2
-#define SIMON_DATA_NX 3
-#define SIMON_DATA_SQ 7
+#define SIMON_DATA_PO 0		// progress in showing current sequence
+#define SIMON_DATA_PI 1		// user progress in current sequence input
+#define SIMON_DATA_SL 2		// current sequence lenght
+#define SIMON_DATA_NX 3		// next change time - 4byte variable
+#define SIMON_DATA_SQ 7     // actual current sequence
+
+/*
+ * Problem: simon rules should not be static - they should be updated by serial.
+ *
+ * Discussion:
+ * a) create new way to setup rules to comlink module
+ * or
+ * b) rules will be updated for each module independently
+ *    and keep in mind that data should be consistent in the input
+ * I am strongly favouring the variant b)
+ * */
 
 byte simon_rules[SIMON_BUTTON_COUNT] = {1, 2, 3, 0};
 
@@ -158,6 +170,8 @@ void test_simon_input(byte module_number) {
 
 }
 
+#ifdef DEBUGING_SIMON_TIME
+
 void test_simon_time(byte module_number) {
   /**
      sanity check, if time (unsigned long) is stored and retrieved correctly
@@ -177,11 +191,11 @@ void test_simon_time(byte module_number) {
 
 }
 
+#endif
+
 /**
    MODULE LOGIC
 */
-
-
 
 void simon_generate_sequence(byte module_number) {
 
@@ -260,13 +274,15 @@ void update_simon(byte module_number) {
       Serial.print(progress);
 #endif
 
-
+      // the variable progress tells which position of sequence should be shown
       if (progress % 2 == 1) {
+		// if progress is even do not show anything
         shift_register_output[pos] = 0;
 #ifdef DEBUGING_SIMON_OUTPUT
         Serial.println();
 #endif
       } else {
+		// if progress is odd show (progress/2) position
         byte base = getSimonSequenceByte(module_number, progress / 2);
         shift_register_output[pos] = simon_output_connection[base];
 #ifdef DEBUGING_SIMON_OUTPUT
@@ -356,4 +372,3 @@ void update_simon(byte module_number) {
   }
 
 }
-
