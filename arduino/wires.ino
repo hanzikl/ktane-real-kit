@@ -99,6 +99,17 @@ void update_wires(byte module_number) {
   byte reading = get_module_sanitized_input(module_number, INPUT_MASK_WIRES, true);
 
   if (clockTicking) {
+
+    if (reading == READING_ERROR) {
+#ifdef DEBUGING_WIRES
+      Serial.print(debug_print_char);
+      Serial.print("M");
+      Serial.print(module_number);
+      Serial.println(F(" RE"));
+#endif
+      return;
+    }
+    
     byte current_mask = getWiresCurrentMask(module_number);
     byte target_mask = getWiresTargetMask(module_number);
 
@@ -142,4 +153,3 @@ void update_wires(byte module_number) {
   }
 
 }
-
