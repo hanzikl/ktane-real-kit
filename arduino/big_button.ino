@@ -17,7 +17,9 @@
 #define BIGB_DATA_PUSHED 3    // if the big button was pushed
 #define BIGB_DATA_PT 4        // time of big button push - 4byte variable
 
-const byte big_button_output_connection[] = {128, 32, 8, 16, 64}; // DISARM INDICATOR, COLORS (TODO)
+#define BIGB_COLOR_COUNT 4
+
+const byte big_button_output_connection[] = {128, 32, 8, 16, 64}; // DISARM INDICATOR, BLUE, YELLOW, WHITE, RED
 
 /*
    Getting and setting data
@@ -66,9 +68,49 @@ void setBigButtonPushTime(byte module_number, unsigned long value) {
 
 void test_big_button_output(byte module_number) {
 
+  int delayTime = 600;
+  byte pos = SRoffsetsOutput[module_number];
+
+  for (int j = 0; j < 2; j++) {
+    for (int i = 0; i < BIGB_COLOR_COUNT; i++) {
+      shift_register_output[pos] = big_button_output_connection[i+1];
+      write_to_output_shift_register();
+      delay(delayTime);
+    }
+
+    shift_register_output[pos] = big_button_output_connection[BIGB_DISARM_LED];
+    write_to_output_shift_register();
+    delay(delayTime);
+
+    /*
+        shift_register_output[pos] = 0;
+        write_to_output_shift_register();
+    */
+  }
+
 }
 
 void test_big_button_input(byte module_number) {
+
+  byte outPos = SRoffsetsOutput[module_number];
+
+  int delayTime = 50; // ms
+
+  shift_register_output[outPos] = 0;
+  while (true) {
+
+    update_shift_registers();
+    delay(delayTime);
+
+    byte input_value = get_module_input(module_number, INPUT_MASK_BIGB, true);
+
+    if (input_value > 0) {
+      break;
+    }
+
+  }
+
+  shift_register_output[outPos] = 0;
 
 }
 
@@ -86,5 +128,20 @@ void setup_big_button(byte module_number) {
 }
 
 void update_big_button(byte module_number) {
+
+  byte pos = SRoffsetsOutput[module_number];
+  if (module_status[module_number] == MODULE_DISARMED) {
+    shift_register_output[pos] = big_button_output_connection[BIGB_DISARM_LED];
+    return;
+  }
+
+  if (module_status[module_number] == MODULE_TESTING) {
+    test_big_button_output(module_number);
+    test_big_button_input(module_number);
+
+    // at the end of test module disarm itself
+    module_status[module_number] = MODULE_DISARMED;
+    return;
+  }
 
 }
