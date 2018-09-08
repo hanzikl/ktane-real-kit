@@ -29,6 +29,9 @@ void call_module_setup(byte module_number) {
     case MODULE_TYPE_WIRES:
       setup_wires(module_number);
       break;
+    case MODULE_TYPE_BIGB:
+      setup_big_button(module_number);
+      break;
     default:
       ;
   }
@@ -64,7 +67,9 @@ void call_module_update(byte module_number, boolean output_only) {
       case MODULE_TYPE_TEST_OUTPUT:
         update_testmodule_output(module_number);
         break;
+      case MODULE_TYPE_BIGB:
+        update_big_button(module_number);
+        break;
     }
   }
 }
-
