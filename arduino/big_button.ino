@@ -13,14 +13,18 @@
 
 #define BIGB_DISARM_LED 0
 
-#define BIGB_DATA_RULES 0     // 3 byte rules - 16xCOLOR + CORRECT_DIGIT for each strike (0-2 strikes)
-                              // color 1-4, digit 0-9
+/**
+   3 byte rules - 16xCOLOR + CORRECT_DIGIT for each strike (0-2 strikes)
+   color [1-4], digit [0-9]
+*/
+#define BIGB_DATA_RULES 0
 #define BIGB_DATA_PUSHED 3    // if the big button was pushed
 #define BIGB_DATA_PT 4        // time of big button push - 4byte variable
 
 #define BIGB_COLOR_COUNT 4
 
 #define BIGB_DELAY_SHORT 300  // millisecond maximum for push and release
+#define BIGB_LIGHTUP_DURATION 500 // lightup duration in milliseconds
 
 const byte big_button_output_connection[] = {128, 32, 8, 16, 64}; // DISARM INDICATOR, BLUE, YELLOW, WHITE, RED
 
@@ -153,6 +157,8 @@ boolean check_button_release_ok(byte module_number) {
       Serial.print(debug_print_char);
       Serial.print("M");
       Serial.print(module_number);
+      Serial.print(" R");
+      Serial.print(rules);
       Serial.print(" D");
       Serial.print(i);
       Serial.print(" C");
@@ -177,7 +183,9 @@ boolean check_button_release_ok(byte module_number) {
 boolean check_duration_and_update(byte module_number, byte pos) {
 
   byte color = getBigButtonRules(module_number, strikes % 3) / 16;
-  boolean not_short = millis() - getBigButtonPushTime(module_number) > BIGB_DELAY_SHORT;
+
+  long held_time = millis() - getBigButtonPushTime(module_number);
+  boolean not_short = held_time > BIGB_DELAY_SHORT;
 
   if (color == 0 && not_short) {
     // push and release was expected, but button is held too long
@@ -194,6 +202,17 @@ boolean check_duration_and_update(byte module_number, byte pos) {
 
   if (not_short) {
 
+    int output_value = big_button_output_connection[color];
+
+    if (held_time < BIGB_DELAY_SHORT + BIGB_LIGHTUP_DURATION) {
+      // light the indicator up gradually
+      long light_level_percent = (held_time - BIGB_DELAY_SHORT) * 100 / BIGB_LIGHTUP_DURATION;
+
+      if (millis() % 100 > light_level_percent) {
+        output_value = 0;
+      }
+    }
+
     if (color <= BIGB_COLOR_COUNT) {
 #ifdef DEBUGING_BIGB_OUTPUT
       Serial.print(debug_print_char);
@@ -202,7 +221,7 @@ boolean check_duration_and_update(byte module_number, byte pos) {
       Serial.print(" C:");
       Serial.println(color);
 #endif
-      shift_register_output[pos] = big_button_output_connection[color];
+      shift_register_output[pos] = output_value;
     } else {
 #ifdef DEBUGING_BIGB_OUTPUT
       Serial.print(debug_print_char);
