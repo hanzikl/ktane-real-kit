@@ -14,6 +14,7 @@
 #define BIGB_DISARM_LED 0
 
 #define BIGB_DATA_RULES 0     // 3 byte rules - 16xCOLOR + CORRECT_DIGIT for each strike (0-2 strikes)
+                              // color 1-4, digit 0-9
 #define BIGB_DATA_PUSHED 3    // if the big button was pushed
 #define BIGB_DATA_PT 4        // time of big button push - 4byte variable
 
@@ -201,7 +202,7 @@ boolean check_duration_and_update(byte module_number, byte pos) {
       Serial.print(" C:");
       Serial.println(color);
 #endif
-      shift_register_output[pos] = big_button_output_connection[color + 1];
+      shift_register_output[pos] = big_button_output_connection[color];
     } else {
 #ifdef DEBUGING_BIGB_OUTPUT
       Serial.print(debug_print_char);
