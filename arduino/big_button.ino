@@ -263,6 +263,7 @@ void update_big_button(byte module_number) {
       setBigButtonPushed(module_number, 0);
 
 #ifdef DEBUGING_BIGB
+      Serial.print(debug_print_char);
       Serial.println(F("RE-ARMING BIGB"));
 #endif
     }
