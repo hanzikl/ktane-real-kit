@@ -77,6 +77,7 @@ const byte DIGIT_DEFINITION[] = {
 
 // 4byte 7segment current digit
 byte segment_digit = 0;
+byte display_digits[5] = {0, 0, 0, 0};
 
 /*
    MODULES STATUS
@@ -332,4 +333,3 @@ void loop() {
 
   }
 }
-

@@ -249,6 +249,7 @@ void update_simon(byte module_number) {
       setSimonNextChangeTime(module_number, millis() + SIMON_DELAY_LONG);
 
 #ifdef DEBUGING_SIMON
+      Serial.print(debug_print_char);
       Serial.println(F("RE-ARMING SIMON"));
 #endif
     }

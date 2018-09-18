@@ -90,25 +90,14 @@ boolean displayShouldHaveDot(int heremillis) {
   return !(clockTicking) || (heremillis % blinkSpeedInversion < blinkSpeedInversion / 2);
 }
 
-void showTimePart(byte minutes, byte seconds, int heremillis, byte module_number) {
-  // segment_digit is global variable for all modules
+void showTimePart(int heremillis, byte module_number) {
 
-  switch (segment_digit) {
-    case 0:
-      showOneDigit(minutes / 10, segment_digit, false, module_number);
-      break;
-    case 1:
-      showOneDigit(minutes % 10, segment_digit, displayShouldHaveDot(heremillis), module_number);
-      break;
-    case 2:
-      showOneDigit(seconds / 10, segment_digit, false, module_number);
-      break;
-    case 3:
-      showOneDigit(seconds % 10, segment_digit, false, module_number);
-      break;
-    default:
-      ;
-  }
+  // segment_digit is global variable for all modules
+  // display_digits is global array for all modules
+  boolean dot = segment_digit == 1 && displayShouldHaveDot(heremillis);
+
+  showOneDigit(display_digits[segment_digit], segment_digit, dot, module_number);
+
 }
 
 void show_empty_display(byte module_number) {
@@ -142,11 +131,22 @@ void show_time(long remainingTime, byte module_number) {
 
   if (remainingTime >= 60 * 1000l) {
     // show minutes and seconds
-    showTimePart(minutes, seconds, heremillis, module_number);
+    display_digits[0] = minutes / 10;
+    display_digits[1] = minutes % 10;
+
+    display_digits[2] = seconds / 10;
+    display_digits[3] = seconds % 10;
+
   } else {
     // show seconds and two digits of milliseconds
-    showTimePart(seconds, heremillis / 10, heremillis, module_number);
+    display_digits[0] = seconds / 10;
+    display_digits[1] = seconds % 10;
+
+    display_digits[2] = heremillis / 100;
+    display_digits[3] = (heremillis / 10) % 10;
   }
+
+  showTimePart(heremillis, module_number);
 
 }
 
@@ -196,4 +196,3 @@ void update_display(byte module_number, boolean output_only) {
   }
 
 }
-
