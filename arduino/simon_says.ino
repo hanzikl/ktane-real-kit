@@ -17,29 +17,24 @@
 #define SIMON_DELAY_LONG 3000
 
 #define INPUT_MASK_SIMON 0b11110000 // must be in reversed order
-// #define OUTPUT_MASK_SIMON 0b01111100
 
 #define SIMON_DISARM_LED 4
 
 // setup data locations
-#define SIMON_DATA_PO 0		// progress in showing current sequence
-#define SIMON_DATA_PI 1		// user progress in current sequence input
-#define SIMON_DATA_SL 2		// current sequence lenght
-#define SIMON_DATA_NX 3		// next change time - 4byte variable
-#define SIMON_DATA_SQ 7     // actual current sequence
 
-/*
- * Problem: simon rules should not be static - they should be updated by serial.
- *
- * Discussion:
- * a) create new way to setup rules to comlink module
- * or
- * b) rules will be updated for each module independently
- *    and keep in mind that data should be consistent in the input
- * I am strongly favouring the variant b)
- * */
-
-byte simon_rules[SIMON_BUTTON_COUNT] = {1, 2, 3, 0};
+/**
+   Simon Rules - 15 bytes
+   padding is added in order to keep remaining data clear during 5bytes wide batch transfer
+   0 strikes ... 5 bytes; 4 bytes [0-3] permutation (for example [1, 2, 0, 3]), 1 byte padding
+   1 strike  ... 5 bytes; 4 bytes [0-3] permutation, 1 byte padding
+   2 strikes ... 5 bytes; 4 bytes [0-3] permutation, 1 byte padding
+*/
+#define SIMON_DATA_RU 0
+#define SIMON_DATA_PO 15		// progress in showing current sequence
+#define SIMON_DATA_PI 16		// user progress in current sequence input
+#define SIMON_DATA_SL 17  	// current sequence lenght
+#define SIMON_DATA_NX 18		// next change time - 4byte variable
+#define SIMON_DATA_SQ 22    // actual current sequence 1x(sequence lenght) bytes
 
 const byte simon_input_connection[] = {16, 32, 64, 128}; // U,R,D,L
 const byte simon_output_connection[] = {32, 8, 16, 64, 128}; // U,R,D,L,I
@@ -49,6 +44,11 @@ byte simon_stage = 0;
 /*
    Getting and setting data
 */
+
+byte getSimonRules(byte module_number, byte byte_number) {
+  return module_data[module_number][SIMON_DATA_RU + byte_number];
+}
+
 byte getSimonProgressOut(byte module_number) {
   return module_data[module_number][SIMON_DATA_PO];
 }
@@ -263,6 +263,16 @@ void update_simon(byte module_number) {
 
   if (clockTicking) {
 
+    if (millis() > next_time + 2 * SIMON_DELAY_LONG) {
+      // difference between now and time of next scheduled change is too big
+      // this does mean that next_time variable was set too far in the past
+      // (next change should take place in at most SIMON_DELAY_LONG millis)
+
+      // fix next_time variable
+      next_time = millis() + SIMON_DELAY_LONG;
+      setSimonNextChangeTime(module_number, next_time);
+    }
+
     if (millis() > next_time) {
       byte progress = getSimonProgressOut(module_number);
 #ifdef DEBUGING_SIMON_OUTPUT
@@ -277,13 +287,13 @@ void update_simon(byte module_number) {
 
       // the variable progress tells which position of sequence should be shown
       if (progress % 2 == 1) {
-		// if progress is even do not show anything
+        // if progress is even do not show anything
         shift_register_output[pos] = 0;
 #ifdef DEBUGING_SIMON_OUTPUT
         Serial.println();
 #endif
       } else {
-		// if progress is odd show (progress/2) position
+        // if progress is odd show (progress/2) position
         byte base = getSimonSequenceByte(module_number, progress / 2);
         shift_register_output[pos] = simon_output_connection[base];
 #ifdef DEBUGING_SIMON_OUTPUT
@@ -321,6 +331,7 @@ void update_simon(byte module_number) {
 
           byte progress = getSimonProgressIn(module_number);
           byte base = getSimonSequenceByte(module_number, progress);
+          byte rule = getSimonRules(module_number, (strikes % 3) * 5 + base);
 #ifdef DEBUGING_SIMON
           Serial.print(debug_print_char);
           Serial.print("M");
@@ -334,13 +345,13 @@ void update_simon(byte module_number) {
           Serial.print(" R");
           Serial.print(reading);
           Serial.print(" E");
-          Serial.println(simon_input_connection[simon_rules[base]]);
+          Serial.println(simon_input_connection[rule]);
 #endif
-          if (reading == simon_input_connection[simon_rules[base]]) {
+          if (reading == simon_input_connection[rule]) {
 
             module_status[module_number] = MODULE_DISARMING_IN_PROGRESS;
             // turn on corresponding LED
-            shift_register_output[pos] = simon_output_connection[simon_rules[base]];
+            shift_register_output[pos] = simon_output_connection[rule];
 
             progress++;
             if (progress > module_stage[module_number] - 1) {
