@@ -1,28 +1,43 @@
 ## Real life Kit for game Keep Talking and Nobody Explodes
 
-Serious ReadMe will be added soon.
+Keep Talking and Nobody Explodes (KTaNE) game in physical realm using Arduino.
 
-Now just for short:
- - There is a folder `arduino` with a lot of code to be explained.
- - Arduino is connected to modules, which are made of stripboard,
-  two chips and some input/output devices (buttons, LEDs, displays).
- - The folder `fritzing` contains some attemps to show DPS to you. It is not pretty yet.
-   Please do not build according to it right away. :-)
- - In the folder `models` you can add your models (via pull request).
+### Features
 
-If you have any questions, ask me on [reddit](https://www.reddit.com/r/ktane/comments/6cxbbc/ktane_real_kit_work_in_progress_wanna_see_more/) or just mail me.
+ - completely inspired by original game
+ - almost all features of original modules preserved
+ - complete physical modularity
+ - realistic look
+ - beeper included
 
-Arduino modules implemented:
+### Planned features
+
+ - special new modules with advantages of physical world
+ - bluetooth configuration upload
+ - API for external devices connected via serial/bluetooth (sounds & lights)
+ - automatic configuration generation (see [ktane-controller](https://github.com/hanzikl/ktane-controller) project)
+
+### Modules implemented
+ - Display (output only)
  - Keypad
  - Simon Says
- - Display (output only module)
  - Maze
-
-Arduino modules to implement:
  - Wires
- - Complicated wires
  - Button
- - Morse
+
+### Repository content
+
+ - `arduino` folder with a arduino programs.
+ - `fritzing` folder contains DPS for modules IO board.
+ - `models` folder contains some early models for 3d printing of modules (in special branch called `models` :-) )
+
+### Technical details
+ - Arduino is connected to modules, which are made of stripboard or manufactured DPS (see `fritzing` folder),
+  two cheap chips and some input/output devices (buttons, LEDs, displays).
+
+### Modules waiting to be implemented:
+ - Morse (comming soon)
+ - Complicated wires
  - Memory
  - Needy capacitor
  - Needy venting
@@ -32,3 +47,5 @@ Modules too difficult to create now:
  - Wire sequence
  - Needy knob
  - Passwords
+
+If you have any question, ask me on [reddit](https://www.reddit.com/r/ktane/comments/6cxbbc/ktane_real_kit_work_in_progress_wanna_see_more/) or just mail me (look for adress in my commits).

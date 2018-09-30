@@ -140,11 +140,6 @@ void setup_keypad(byte module_number) {
   setKeypadCorrectButtons(module_number, 0);
   setKeypadWrongButtons(module_number, 0);
 
-  setKeypadSequenceByte(module_number, 0, 0);
-  setKeypadSequenceByte(module_number, 1, 1);
-  setKeypadSequenceByte(module_number, 2, 2);
-  setKeypadSequenceByte(module_number, 3, 3);
-
 }
 
 void update_keypad(byte module_number) {
